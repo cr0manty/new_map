@@ -24,12 +24,13 @@ private:
 	void resize();
 	Key HashCode(Key);
 	size_t m_begin;
-	iterator m_iter;
+protected:
+	
 	Key &_getkey(size_t);
 	Value &_getvalue(size_t);
 public:
-
-	new_map(size_t = 100);
+	new_map();
+	new_map(size_t);
 	size_t npos = -1;
 	size_t begin() const;
 	size_t end() const;
@@ -47,20 +48,21 @@ struct new_map<Key, Value>::Element
 {
 	Key m_key;
 	Value m_value;
-	enum { NOT_OCCUPIED, OCCUPIED, DELETED } m_status;
+	enum Status {
+		NOT_OCCUPIED, OCCUPIED, DELETED
+	};
 };
 
 template<typename Key, typename Value>
-class iterator
+class iterator //: private new_map<Key, Value>
 {
+	typedef new_map<Key, Value> new_map;
+	new_map m_map;
 	size_t iter;
-	Key m_cKey;
-	Value m_cValue;
-
 public:
-	Key *first;
-	Value *second;
 	iterator();
+	Key first;
+	Value second;
 	//bool operator==(iterator&);
 	//bool operator!=(iterator&);
 	void operator=(size_t);
@@ -129,17 +131,26 @@ inline Key new_map<Key, Value>::HashCode(Key _key)
 }
 
 template<typename Key, typename Value>
-inline Key & new_map<Key, Value>::_getkey(size_t _index)
+inline Key& new_map<Key, Value>::_getkey(size_t _index)
 {
 	if (m_pData[_index].m_status == Element::OCCUPIED)
-		return this->m_pData.m_key;
+		return this->m_pData[_index].m_key;
 }
 
 template<typename Key, typename Value>
 inline Value & new_map<Key, Value>::_getvalue(size_t _index)
 {
 	if (m_pData[_index].m_status == Element::OCCUPIED)
-		return this->m_pData.m_value;
+		return this->m_pData[_index].m_value;
+}
+
+template<typename Key, typename Value>
+inline new_map<Key, Value>::new_map() :
+	m_size(100), m_begin(0), m_dOccupiedSize(0)
+{
+	m_pData = new Element[m_size];
+
+	clear();
 }
 
 template<typename Key, typename Value>
@@ -222,7 +233,7 @@ inline new_map<Key, Value>::~new_map()
 
 template<typename Key, typename Value>
 inline iterator<Key, Value>::iterator() :
-	iter(0)
+	iter(-1)
 {
 }
 
@@ -242,8 +253,10 @@ template<typename Key, typename Value>
 inline void iterator<Key, Value>::operator=(size_t _index)
 {
 	this->iter = _index;
-	this->first = _getkey(this->iter);
-	this->second = _getvalue(this->iter);
+	this->first = m_map.getData(iter)->m_key;
+
+	//this->first = m_map._getkey(this->iter);
+	//this->second = _getvalue(this->iter);
 }
 
 template<typename Key, typename Value>
