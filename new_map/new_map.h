@@ -13,7 +13,7 @@ public:
 	typedef iterator<Key, Value> iterator;
 
 private:
-	friend class iterator;
+	//friend class iterator;
 	struct Element;
 
 	size_t m_size;
@@ -22,7 +22,6 @@ private:
 
 	bool tryInsert(size_t _bucketNr, Key _key, Value _value);
 	void resize();
-	Key HashCode(Key);
 	size_t m_begin;
 protected:
 	
@@ -54,7 +53,7 @@ struct new_map<Key, Value>::Element
 };
 
 template<typename Key, typename Value>
-class iterator //: private new_map<Key, Value>
+class iterator : private new_map<Key, Value>
 {
 	typedef new_map<Key, Value> new_map;
 	new_map m_map;
@@ -63,11 +62,11 @@ public:
 	iterator();
 	Key first;
 	Value second;
-	//bool operator==(iterator&);
-	//bool operator!=(iterator&);
+	bool operator==(iterator&);
+	bool operator!=(iterator&);
 	void operator=(size_t);
-	void operator++();
-	void operator--();
+	iterator operator++();
+	iterator operator--();
 	void operator->();
 	size_t _getthis() const;
 
@@ -122,12 +121,6 @@ inline void new_map<Key, Value>::resize()
 		}
 
 	delete[] oldData;
-}
-
-template<typename Key, typename Value>
-inline Key new_map<Key, Value>::HashCode(Key _key)
-{
-	return _key;
 }
 
 template<typename Key, typename Value>
@@ -195,15 +188,14 @@ inline void new_map<Key, Value>::insert(Key _key, Value _value)
 	if ((m_dOccupiedSize << 1) >= m_size)
 		resize();
 
-	Key hashCode = HashCode(_key);
-	size_t bucketNr = hashCode % m_size;
+	size_t bucketNr = _key % m_size;
 
 	for (size_t i = bucketNr; i < m_size; i++)
-		if (tryInsert(i, HashCode(_key), _value))
+		if (tryInsert(i, _key, _value))
 			return;
 
 	for (int i = 0; i < bucketNr; i++)
-		if (tryInsert(i, HashCode(_key), _value))
+		if (tryInsert(i, _key, _value))
 			return;
 }
 
@@ -237,40 +229,37 @@ inline iterator<Key, Value>::iterator() :
 {
 }
 
-//template<typename Key, typename Value>
-//inline bool iterator<Key, Value>::operator==(iterator & _other)
-//{
-//	return this->_getthis() == _other._getthis();
-//}
-//
-//template<typename Key, typename Value>
-//inline bool iterator<Key, Value>::operator!=(iterator & _other)
-//{
-//	return this->_getthis() != _other._getthis();
-//}
+template<typename Key, typename Value>
+inline bool iterator<Key, Value>::operator==(iterator & _other)
+{
+	return this->_getthis() == _other._getthis();
+}
+
+template<typename Key, typename Value>
+inline bool iterator<Key, Value>::operator!=(iterator & _other)
+{
+	return this->_getthis() != _other._getthis();
+}
 
 template<typename Key, typename Value>
 inline void iterator<Key, Value>::operator=(size_t _index)
 {
 	this->iter = _index;
-	this->first = m_map.getData(iter)->m_key;
 
-	//this->first = m_map._getkey(this->iter);
-	//this->second = _getvalue(this->iter);
+	this->first = _getkey(this->iter);
+	this->second = _getvalue(this->iter);
 }
 
 template<typename Key, typename Value>
-inline void iterator<Key, Value>::operator++()
+inline iterator<Key, Value> iterator<Key, Value>::operator++()
 {
 	this->iter += 1;
-	//m_cData = &m_pData[this->iter];
 }
 
 template<typename Key, typename Value>
-inline void iterator<Key, Value>::operator--()
+inline iterator<Key, Value> iterator<Key, Value>::operator--()
 {
 	this->iter -= 1;
-	//m_cData = &m_pData[this->iter];
 }
 
 template<typename Key, typename Value>
