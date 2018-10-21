@@ -12,9 +12,9 @@ int main()
 	
 	new_map<int, std::string>::iterator iter = mapa.begin();
 	std::cout<< mapa.find(2).second;
-	//std::cout << iter.first;
-	////iter++;
-	//std::cout << iter.second;
+	std::cout << iter.first;
+	iter++;
+	std::cout << iter.second;
 
 
 	getchar();

@@ -57,7 +57,7 @@ public:
 	void operator=(Element &);
 	operator int();
 
-	//iterator& operator++();
+	Element* operator++();
 	//iterator operator--();
 	//Element& operator*();
 	//Element* operator->();
@@ -269,6 +269,13 @@ template<typename Key, typename Value>
 inline iterator<Key, Value>::operator int()
 {
 	return m_index;
+}
+
+template<typename Key, typename Value>
+inline Element<Key, Value>* iterator<Key, Value>::operator++()
+{
+	*ptr += sizeof(Element);
+	return ptr;
 }
 
 template<typename Key, typename Value>
