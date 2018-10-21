@@ -29,7 +29,7 @@ public:
 	new_map(size_t);
 	iterator npos;
 	Element& begin();
-	Element& end() const;
+	Element& end();
 	size_t size() const;
 	bool empty() const;
 	void clear();
@@ -43,10 +43,10 @@ template<typename Key, typename Value>
 class iterator 
 {
 	size_t m_index;
-	Element<Key, Value> ptr;
+	Element<Key, Value> *ptr;
 public:
-	Key first;
-	Value second;
+	Key *first;
+	Value *second;
 
 	typedef Element<Key, Value> Element;
 	typedef Value& reference;
@@ -56,7 +56,7 @@ public:
 	bool operator==(Element &);
 	void operator=(Element &);
 	operator int();
-
+	void operator=(Value);
 	Element* operator++();
 	//iterator operator--();
 	//Element& operator*();
@@ -161,7 +161,7 @@ inline Element<Key, Value>& new_map<Key, Value>::begin()
 }
 
 template<typename Key, typename Value>
-inline Element<Key, Value>& new_map<Key, Value>::end() const
+inline Element<Key, Value>& new_map<Key, Value>::end()
 {
 	size_t _index = m_dOccupiedSize;
 	while (m_pData[m_dOccupiedSize].m_status != Element<Key, Value>::OCCUPIED &&
@@ -240,9 +240,9 @@ inline iterator<Key, Value>::iterator()
 template<typename Key, typename Value>
 inline iterator<Key, Value>::iterator(Element& _data)
 {
-	ptr = _data;
-	first = _data.m_key;
-	second = _data.m_value;
+	ptr = &_data;
+	first = &_data.m_key;
+	second = &_data.m_value;
 }
 
 template<typename Key, typename Value>
@@ -269,6 +269,12 @@ template<typename Key, typename Value>
 inline iterator<Key, Value>::operator int()
 {
 	return m_index;
+}
+
+template<typename Key, typename Value>
+inline void iterator<Key, Value>::operator=(Value _value)
+{
+	second = &_value;
 }
 
 template<typename Key, typename Value>
