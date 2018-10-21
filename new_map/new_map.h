@@ -23,18 +23,18 @@ private:
 	bool tryInsert(size_t, Key, Value);
 	void resize();
 	size_t m_begin;
-	Element make_npos();
+	iterator make_npos();
 public:
 	new_map();
 	new_map(size_t);
-	Element npos;
+	iterator npos;
 	Element& begin();
 	Element& end() const;
 	size_t size() const;
 	bool empty() const;
 	void clear();
 	void insert(Key, Value);
-	Element& find(Key);
+	iterator find(Key);
 	void print();
 	~new_map();
 };
@@ -45,9 +45,9 @@ class iterator
 	size_t m_index;
 	Element<Key, Value> ptr;
 public:
-	/*Key first;
+	Key first;
 	Value second;
-*/
+
 	typedef Element<Key, Value> Element;
 	typedef Value& reference;
 	iterator();
@@ -59,7 +59,7 @@ public:
 
 	//iterator& operator++();
 	//iterator operator--();
-	Element& operator*();
+	//Element& operator*();
 	//Element* operator->();
 
 	//iterator operator+ (size_t);
@@ -80,10 +80,6 @@ class Element
 	enum {	NOT_OCCUPIED, OCCUPIED, DELETED, NULLPTR } m_status;
 	bool operator==(Element&);
 	bool operator!=(Element&);
-public:
-	Key first;
-	Value second;
-
 };
 
 template<typename Key, typename Value>
@@ -213,12 +209,12 @@ inline void new_map<Key, Value>::insert(Key _key, Value _value)
 }
 
 template<typename Key, typename Value>
-inline Element<Key, Value> &new_map<Key, Value>::find(Key _key)
+inline iterator<Key, Value> new_map<Key, Value>::find(Key _key)
 {
 	for (size_t i = 0; i < m_dOccupiedSize; i++)
 		if (m_pData[i].m_status == Element::OCCUPIED)
 			if (m_pData[i].m_key == _key)
-				return m_pData[i];
+				return iterator(m_pData[i]);
 
 	return npos;
 }
@@ -245,8 +241,8 @@ template<typename Key, typename Value>
 inline iterator<Key, Value>::iterator(Element& _data)
 {
 	ptr = _data;
-	/*first = _data.m_key;
-	second = _data.m_value;*/
+	first = _data.m_key;
+	second = _data.m_value;
 }
 
 template<typename Key, typename Value>
@@ -265,8 +261,8 @@ template<typename Key, typename Value>
 inline void iterator<Key, Value>::operator=(Element& _data)
 {
 	ptr = _data;
-	/*first = _data.m_key;
-	second = _data.m_value;*/
+	first = _data.m_key;
+	second = _data.m_value;
 }
 
 template<typename Key, typename Value>
@@ -289,10 +285,10 @@ inline bool Element<Key, Value>::operator!=(Element &_other)
 }
 
 template<typename Key, typename Value>
-inline Element<Key, Value> new_map<Key, Value>::make_npos()
+inline iterator<Key, Value> new_map<Key, Value>::make_npos()
 {
 	Element null_ptr;
 	null_ptr.m_index = -1;
 	null_ptr.m_status = Element::NULLPTR;
-	return null_ptr;
+	return iterator(null_ptr);
 }
