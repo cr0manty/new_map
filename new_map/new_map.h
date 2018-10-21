@@ -4,83 +4,100 @@
 #include <iostream>
 
 template<typename Key, typename Value>
+class Element;
+
+template<typename Key, typename Value>
 class iterator;
 
 template<typename Key, typename Value>
 class new_map
 {
-public:
-	typedef iterator<Key, Value> iterator;
-
-private:
-	//friend class iterator;
-	struct Element;
-
 	size_t m_size;
 	size_t m_dOccupiedSize;
-	Element* m_pData;
+	Element<Key,Value>* m_pData;
 
 	bool tryInsert(size_t _bucketNr, Key _key, Value _value);
 	void resize();
 	size_t m_begin;
-protected:
-	
-	Key &_getkey(size_t);
-	Value &_getvalue(size_t);
+	Element<Key,Value>* makeptr(size_t);
+	iterator<Key, Value> make_npos();
 public:
 	new_map();
 	new_map(size_t);
-	size_t npos = -1;
-	size_t begin() const;
-	size_t end() const;
+	typedef iterator<Key, Value> iterator;
+	friend class iterator;
+	iterator npos;
+	Element<Key,Value>& begin();
+	Element<Key, Value>& end() const;
 	size_t size() const;
+	bool empty() const;
 	void clear();
 	void insert(Key, Value);
-	iterator find(Key) const;
+	iterator find(Key);
 	void print();
 	~new_map();
 
 };
 
 template<typename Key, typename Value>
-struct new_map<Key, Value>::Element
+class iterator 
 {
-	Key m_key;
-	Value m_value;
-	enum Status {
-		NOT_OCCUPIED, OCCUPIED, DELETED
-	};
-};
-
-template<typename Key, typename Value>
-class iterator : private new_map<Key, Value>
-{
-	typedef new_map<Key, Value> new_map;
-	new_map m_map;
-	size_t iter;
+	size_t m_index;
+	Element<Key, Value> ptr;
 public:
-	iterator();
 	Key first;
 	Value second;
-	bool operator==(iterator&);
-	bool operator!=(iterator&);
-	void operator=(size_t);
-	iterator operator++();
-	iterator operator--();
-	void operator->();
-	size_t _getthis() const;
+	typedef Value* pointer;
+	typedef Value& reference;
+	typedef std::random_access_iterator_tag iterator_category;
 
+	iterator(Element<Key, Value> &p);
+	pointer operator++()
+	{
+		return ptr->makeptr(m_index++);
+	}
+	iterator operator--()
+	{
+		return ptr->makeptr(m_index--);
+	}
+	bool operator!=(Element<Key, Value> &);
+	bool operator==(Element<Key, Value> &);
+	//reference operator*() { return ptr->make(index); }
+	/*pointer operator->() { return ptr->makeptr(index); }
+
+	pointer operator+ (const int n) { return ptr->makeptr(index + n); }
+	pointer operator- (const int n) { return ptr->makeptr(index - n); }
+	pointer operator+=(const int n) { return ptr->makeptr(index += n); }
+	pointer operator-=(const int n) { return ptr->makeptr(index -= n); }*/
+	//reference operator[](int i) { return ptr->make(i); }
+	//operator int() { return index; }
 };
 
 template<typename Key, typename Value>
-inline bool new_map<Key, Value>::tryInsert(size_t _bucketNr, Key _key, Value _value)
+class Element
 {
-	if (m_pData[_bucketNr].m_status != Element::OCCUPIED)
-	{
-		m_pData[_bucketNr].m_status = Element::OCCUPIED;
-		m_pData[_bucketNr].m_key = _key;
-		m_pData[_bucketNr].m_value = _value;
+	friend class iterator<Key, Value>;
+	friend class new_map<Key,Value>;
+	
+	Key m_key;
+	Value m_value;
+	size_t m_index;
+	enum {
+		NOT_OCCUPIED, OCCUPIED, DELETED, NULLPTR
+	} m_status;
+	bool operator==(Element&);
+	bool operator!=(Element&);
+};
 
+template<typename Key, typename Value>
+inline bool new_map<Key, Value>::tryInsert(size_t _index, Key _key, Value _value)
+{
+	if (m_pData[_index].m_status != Element<Key, Value>::OCCUPIED)
+	{
+		m_pData[_index].m_status = Element<Key, Value>::OCCUPIED;
+		m_pData[_index].m_key = _key;
+		m_pData[_index].m_value = _value;
+		m_pData[_index].m_index = _index;
 		m_dOccupiedSize++;
 		return true;
 	}
@@ -94,15 +111,15 @@ inline void new_map<Key, Value>::resize()
 	size_t oldSize = m_size;
 	m_size <<= 1;
 
-	Element* oldData = m_pData;
-	m_pData = new Element[m_size];
+	Element<Key, Value>* oldData = m_pData;
+	m_pData = new Element<Key, Value>[m_size];
 	for (int i = 0; i < m_size; i++)
-		m_pData[i].m_status = Element::NOT_OCCUPIED;
+		m_pData[i].m_status = Element<Key, Value>::NOT_OCCUPIED;
 
 	m_dOccupiedSize = 0;
 
 	for (int i = 0; i < oldSize; i++)
-		if (oldData[i].m_status == Element::OCCUPIED) {
+		if (oldData[i].m_status == Element<Key, Value>::OCCUPIED) {
 			if ((m_dOccupiedSize << 1) >= m_size)
 				resize();
 
@@ -124,31 +141,24 @@ inline void new_map<Key, Value>::resize()
 }
 
 template<typename Key, typename Value>
-inline Key& new_map<Key, Value>::_getkey(size_t _index)
+inline Element<Key, Value> * new_map<Key, Value>::makeptr(size_t _index)
 {
-	if (m_pData[_index].m_status == Element::OCCUPIED)
-		return this->m_pData[_index].m_key;
-}
-
-template<typename Key, typename Value>
-inline Value & new_map<Key, Value>::_getvalue(size_t _index)
-{
-	if (m_pData[_index].m_status == Element::OCCUPIED)
-		return this->m_pData[_index].m_value;
+	if (m_pData[_index].m_status == Element<Key, Value>::OCCUPIED)
+		return &m_pData[_index];
 }
 
 template<typename Key, typename Value>
 inline new_map<Key, Value>::new_map() :
-	m_size(100), m_begin(0), m_dOccupiedSize(0)
+	m_size(100), m_begin(0), m_dOccupiedSize(0), npos(make_npos())
 {
-	m_pData = new Element[m_size];
+	m_pData = new Element<Key,Value>[m_size];
 
 	clear();
 }
 
 template<typename Key, typename Value>
 inline new_map<Key, Value>::new_map(size_t _size) :
-	m_size(_size), m_begin(0), m_dOccupiedSize(0)
+	m_size(_size), m_begin(0), m_dOccupiedSize(0), npos(make_npos)
 {
 	m_pData = new Element[m_size];
 
@@ -156,15 +166,22 @@ inline new_map<Key, Value>::new_map(size_t _size) :
 }
 
 template<typename Key, typename Value>
-inline size_t new_map<Key, Value>::begin() const
+inline Element<Key, Value>& new_map<Key, Value>::begin()
 {
-	return m_begin;
+	while (m_pData[m_begin].m_status != Element<Key,Value>::OCCUPIED && 
+		m_dOccupiedSize >= m_begin) m_begin++;
+
+	return m_pData[m_begin];
 }
 
 template<typename Key, typename Value>
-inline size_t new_map<Key, Value>::end() const
+inline Element<Key, Value>& new_map<Key, Value>::end() const
 {
-	return m_dOccupiedSize;
+	size_t _index = m_dOccupiedSize;
+	while (m_pData[m_dOccupiedSize].m_status != Element<Key, Value>::OCCUPIED &&
+		m_dOccupiedSize >= 0) --_index;
+
+	return m_pData[_index - 1];
 }
 
 template<typename Key, typename Value>
@@ -174,12 +191,18 @@ inline size_t new_map<Key, Value>::size() const
 }
 
 template<typename Key, typename Value>
+inline bool new_map<Key, Value>::empty() const
+{
+	return m_dOccupiedSize;
+}
+
+template<typename Key, typename Value>
 inline void new_map<Key, Value>::clear()
 {
 	m_dOccupiedSize = 0;
 	for (int i = 0; i < m_size; i++)
-		if (m_pData[i].m_status == Element::OCCUPIED)
-			m_pData[i].m_status = Element::NOT_OCCUPIED;
+		if (m_pData[i].m_status == Element<Key, Value>::OCCUPIED)
+			m_pData[i].m_status = Element<Key, Value>::NOT_OCCUPIED;
 }
 
 template<typename Key, typename Value>
@@ -200,12 +223,12 @@ inline void new_map<Key, Value>::insert(Key _key, Value _value)
 }
 
 template<typename Key, typename Value>
-inline iterator<Key, Value> new_map<Key, Value>::find(Key _key) const
+inline iterator<Key, Value> new_map<Key, Value>::find(Key _key)
 {
 	for (size_t i = 0; i < m_dOccupiedSize; i++)
-		if (m_pData[i].m_status == Element::OCCUPIED)
+		if (m_pData[i].m_status == Element<Key, Value>::OCCUPIED)
 			if (m_pData[i].m_key == _key)
-				return iterator(i)._getthis();
+				return iterator(m_pData[i]);
 
 	return npos;
 }
@@ -224,52 +247,47 @@ inline new_map<Key, Value>::~new_map()
 }
 
 template<typename Key, typename Value>
-inline iterator<Key, Value>::iterator() :
-	iter(-1)
+inline iterator<Key, Value>::iterator(Element<Key, Value>& _data)
 {
+	ptr = _data;
+	first = _data.m_key;
+	second = _data.m_value;
 }
 
 template<typename Key, typename Value>
-inline bool iterator<Key, Value>::operator==(iterator & _other)
+inline bool iterator<Key, Value>::operator!=(Element<Key, Value>& _other)
 {
-	return this->_getthis() == _other._getthis();
+	return this->ptr != _other;
 }
 
 template<typename Key, typename Value>
-inline bool iterator<Key, Value>::operator!=(iterator & _other)
+inline bool iterator<Key, Value>::operator==(Element<Key, Value>& _other)
 {
-	return this->_getthis() != _other._getthis();
+	return this->ptr == _other;
 }
 
 template<typename Key, typename Value>
-inline void iterator<Key, Value>::operator=(size_t _index)
+inline bool Element<Key, Value>::operator==(Element &_other)
 {
-	this->iter = _index;
-
-	this->first = _getkey(this->iter);
-	this->second = _getvalue(this->iter);
+	return this->m_key == _other.m_key && this->m_value == _other.m_value && this->m_status == _other.m_status;
 }
 
 template<typename Key, typename Value>
-inline iterator<Key, Value> iterator<Key, Value>::operator++()
+inline bool Element<Key, Value>::operator!=(Element &_other)
 {
-	this->iter += 1;
+	return this->m_key != _other.m_key && this->m_value != _other.m_value && this->m_status != _other.m_status;
+
 }
 
 template<typename Key, typename Value>
-inline iterator<Key, Value> iterator<Key, Value>::operator--()
+inline iterator<Key, Value> new_map<Key, Value>::make_npos()
 {
-	this->iter -= 1;
+	Element<Key, Value> null_ptr;
+	null_ptr.m_index = -1;
+	//
+	null_ptr.m_key = nullptr;
+	null_ptr.m_value = nullptr;
+	//
+	null_ptr.m_status = Element<Key, Value>::NULLPTR;
+	return iterator(null_ptr);
 }
-
-template<typename Key, typename Value>
-inline void iterator<Key, Value>::operator->()
-{
-}
-
-template<typename Key, typename Value>
-inline size_t iterator<Key, Value>::_getthis() const
-{
-	return iter;
-}
-
