@@ -11,12 +11,12 @@ int main()
 		mapa.insert(i, "sss");
 	
 	new_map<int, std::string>::iterator iter = mapa.begin();
-	//std::cout<< 
-	mapa.find(2).second = lol;
-	std::cout << iter.first;
-	//iter++;
-	std::cout << iter.second;
+	new_map<int, std::string>::iterator it = mapa.end();
+	int i = 0;
+	for (; iter != it; iter++)
+		std::cout << i++ << std::endl;
 
+	std::cout << mapa.find(2)->first << std::endl;
 	mapa.print();
 	getchar();
 	return 0;
