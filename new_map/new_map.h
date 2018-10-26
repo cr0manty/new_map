@@ -10,10 +10,10 @@ template<typename Key, typename Value>
 class new_map 
 {
 public:
-	friend class iterator<Key, Value>;
 	typedef iterator<Key, Value> iterator;
 private:
 	typedef Element<Key, Value> Element;
+	friend class iterator;
 	size_t m_size;
 	size_t m_dOccupiedSize;
 	Element* m_pData;
@@ -21,6 +21,7 @@ private:
 	void resize();
 	size_t m_begin;
 	iterator make_npos();
+	iterator *iter;
 public:
 	new_map();
 	new_map(size_t);
@@ -44,11 +45,11 @@ class iterator
 	Element *m_Data;
 public:
 	iterator() {}
+	iterator(Element *);
 	nKey *first;
 	nValue *second;
-	iterator(Element *);
+	
 	iterator &operator=(Element *);
-
 	bool operator!=(iterator);
 	bool operator==(iterator);
 	bool operator<=(iterator);
@@ -70,6 +71,7 @@ class Element
 	nKey m_key;
 	nValue m_value;
 	enum {	NOT_OCCUPIED, OCCUPIED, DELETED, NULLPTR } m_status;
+
 	bool operator==(Element);
 	bool operator!=(Element);
 	bool operator<=(Element);
@@ -98,8 +100,6 @@ inline void new_map<Key, Value>::resize()
 {
 	size_t oldSize = m_size;
 	m_size <<= 1;
-	Key hashCode;
-	size_t bucketNr;
 	Element* oldData = m_pData;
 	m_pData = new Element[m_size];
 	for (int i = 0; i < m_size; i++)
@@ -107,23 +107,18 @@ inline void new_map<Key, Value>::resize()
 
 	m_dOccupiedSize = 0;
 
-	for (int i = 0; i < oldSize; i++)
+	for (size_t i = 0; i < oldSize; i++)
 		if (oldData[i].m_status == Element::OCCUPIED) {
 			if ((m_dOccupiedSize << 1) >= m_size)
 				resize();
 
-			hashCode = oldData[i].m_key;
-			bucketNr = hashCode % m_size;
-
-			for (size_t i = bucketNr; i < m_size; i++)
-				if (tryInsert(i, oldData[i].m_key, oldData[i].m_value))
+			for (size_t j = i; j < m_size; j++)
+				if (tryInsert(j, oldData[j].m_key, oldData[j].m_value))
 					break;
 
-			for (int i = 0; i < bucketNr; i++)
-				if (tryInsert(i, oldData[i].m_key, oldData[i].m_value))
+			for (size_t j = 0; j < i; j++)
+				if (tryInsert(j, oldData[j].m_key, oldData[j].m_value))
 					break;
-
-			//insert(oldData[i].m_key, oldData[i].m_value);
 		}
 
 	delete[] oldData;
@@ -204,13 +199,11 @@ inline void new_map<Key, Value>::insert(Key _key, Value _value)
 	if ((m_dOccupiedSize << 1) >= m_size)
 		resize();
 
-	size_t bucketNr = _key % m_size;
-
-	for (size_t i = bucketNr; i < m_size; i++)
+	for (size_t i = m_dOccupiedSize; i < m_size; i++)
 		if (tryInsert(i, _key, _value))
 			return;
 
-	for (int i = 0; i < bucketNr; i++)
+	for (size_t i = 0; i < m_dOccupiedSize; i++)
 		if (tryInsert(i, _key, _value))
 			return;
 }
@@ -218,16 +211,12 @@ inline void new_map<Key, Value>::insert(Key _key, Value _value)
 template<typename Key, typename Value>
 inline iterator<Key, Value>* new_map<Key, Value>::find(Key _key)
 {
-	iterator *it;
 	for (size_t i = 0; i < m_dOccupiedSize; i++)
 		if (m_pData[i].m_status == Element::OCCUPIED)
 			if (m_pData[i].m_key == _key)
-			{
-				it = new iterator(&m_pData[i]);
-				return it;
-			}
+				return new iterator(&m_pData[i]);
 
-	return &npos;
+	return &npos;;
 }
 
 template<class nKey, class nValue>
