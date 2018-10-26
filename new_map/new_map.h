@@ -34,8 +34,6 @@ public:
 	void insert(Key, Value);
 	iterator* find(Key);
 	void print(std::ostream&);
-	iterator &operator=(Key);
-	iterator operator=(Value);
 	~new_map();
 };
 
@@ -46,8 +44,8 @@ class iterator
 	Element *m_Data;
 public:
 	iterator() {}
-	nKey first;
-	nValue second;
+	nKey *first;
+	nValue *second;
 	iterator(Element *);
 	iterator &operator=(Element *);
 
@@ -77,7 +75,7 @@ class Element
 	bool operator<=(Element);
 	bool operator>=(Element);
 	bool operator<(Element);
-	bool operator>(Element)
+	bool operator>(Element);
 };
 
 template<typename Key, typename Value>
@@ -100,7 +98,8 @@ inline void new_map<Key, Value>::resize()
 {
 	size_t oldSize = m_size;
 	m_size <<= 1;
-
+	Key hashCode;
+	size_t bucketNr;
 	Element* oldData = m_pData;
 	m_pData = new Element[m_size];
 	for (int i = 0; i < m_size; i++)
@@ -113,18 +112,18 @@ inline void new_map<Key, Value>::resize()
 			if ((m_dOccupiedSize << 1) >= m_size)
 				resize();
 
-			Key hashCode = oldData[i].m_key;
-			auto bucketNr = hashCode % m_size;
+			hashCode = oldData[i].m_key;
+			bucketNr = hashCode % m_size;
 
 			for (size_t i = bucketNr; i < m_size; i++)
 				if (tryInsert(i, oldData[i].m_key, oldData[i].m_value))
-					return;
+					break;
 
 			for (int i = 0; i < bucketNr; i++)
 				if (tryInsert(i, oldData[i].m_key, oldData[i].m_value))
-					return;
+					break;
 
-			insert(oldData[i].m_key, oldData[i].m_value);
+			//insert(oldData[i].m_key, oldData[i].m_value);
 		}
 
 	delete[] oldData;
@@ -188,7 +187,7 @@ inline void new_map<Key, Value >::clear()
 			m_pData[i].m_status = Element::NOT_OCCUPIED;
 }
 
-template<typename Key, typename Value>
+template<typename Key, typename Value>//
 inline void new_map<Key, Value>::emplace(Key _key, Value _value)
 {
 	if (find(_key) != npos) {
@@ -238,15 +237,6 @@ inline void new_map<nKey, nValue>::print(std::ostream& _st)
 		_st << m_pData[i].m_key << " " << m_pData[i].m_value << '\n';
 }
 
-template<typename Key, typename Value>
-inline iterator<Key, Value> new_map<Key, Value>::operator=(Value _value)
-{
-	this->second = _value;
-	this->m_Data->m_value = _value;
-
-	return *this;
-}
-
 template<class nKey, class nValue>
 inline new_map<nKey, nValue>::~new_map()
 {
@@ -257,23 +247,16 @@ template<class nKey, class nValue>
 inline iterator<nKey, nValue>::iterator(Element* _data)
 {
 	m_Data = _data;
-	first = this->m_Data->m_key;
-	second = this->m_Data->m_value;
+	first = &(*m_Data).m_key;
+	second = &(*m_Data).m_value;
 }
 
 template<class nKey, class nValue>
 inline iterator<nKey, nValue> & iterator<nKey, nValue>::operator=(Element * _data)
 {
 	m_Data = _data;
-	return *this;
-}
-
-template<class nKey, class nValue>
-inline iterator<nKey, nValue> &new_map<nKey, nValue>::operator=(nKey _key)
-{
-	this->first = _key;
-	this->m_Data->m_key = _key;
-
+	first = &(*m_Data).m_key;
+	second = &(*m_Data).m_value;
 	return *this;
 }
 
