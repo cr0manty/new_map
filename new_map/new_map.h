@@ -1,5 +1,5 @@
 #pragma once
-#include <iostream>
+
 
 template<class nKey, class nValue>
 class Element;
@@ -33,7 +33,7 @@ public:
 	void clear();
 	void insert(Key, Value);
 	iterator* find(Key);
-	void print();
+	void print(std::ostream&);
 	~new_map();
 };
 
@@ -41,10 +41,11 @@ template<class nKey, class nValue>
 class iterator
 {
 	typedef Element<nKey, nValue> Element;
+	Element *m_Data;
 public:
 	iterator() {}
-	nKey *first;
-	nValue *second;
+	nKey first;
+	nValue second;
 	iterator(Element *);
 	iterator &operator=(Element *);
 
@@ -58,10 +59,6 @@ public:
 	iterator &operator++();
 	iterator &operator--();
 	iterator operator--(int);
-private:
-	size_t m_index;
-	Element *m_Data;
-	
 };
 
 template<class nKey, class nValue>
@@ -142,7 +139,7 @@ inline new_map<Key, Value>::new_map() :
 
 template<typename Key, typename Value>
 inline new_map<Key, Value>::new_map(size_t _size) :
-	m_size(_size), m_begin(0), m_dOccupiedSize(0), npos(make_npos)
+	m_size(_size), m_begin(0), m_dOccupiedSize(0), npos(make_npos())
 {
 	m_pData = new Element[m_size];
 
@@ -223,10 +220,10 @@ inline iterator<Key, Value>* new_map<Key, Value>::find(Key _key)
 }
 
 template<class nKey, class nValue>
-inline void new_map<nKey, nValue>::print()
+inline void new_map<nKey, nValue>::print(std::ostream& _st)
 {
 	for (size_t i = 0; i < m_dOccupiedSize; i++)
-		std::cout << m_pData[i].m_key << " " << m_pData[i].m_value << std::endl;
+		_st << m_pData[i].m_key << " " << m_pData[i].m_value << '\n';
 }
 
 template<class nKey, class nValue>
@@ -239,8 +236,8 @@ template<class nKey, class nValue>
 inline iterator<nKey, nValue>::iterator(Element* _data)
 {
 	m_Data = _data;
-	first = &(this->m_Data->m_key);
-	second = &(this->m_Data->m_value);
+	first = this->m_Data->m_key;
+	second = this->m_Data->m_value;
 }
 
 template<class nKey, class nValue>

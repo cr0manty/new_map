@@ -17,7 +17,7 @@ int main()
 		std::cout << i++ << std::endl;
 
 	std::cout << mapa.find(2)->first << std::endl;
-	mapa.print();
+	mapa.print(std::cout);
 	getchar();
 	return 0;
 }
