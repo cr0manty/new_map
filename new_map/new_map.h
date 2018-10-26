@@ -1,6 +1,5 @@
 #pragma once
 
-
 template<class nKey, class nValue>
 class Element;
 
@@ -8,7 +7,7 @@ template<class nKey, class nValue>
 class iterator;
 
 template<typename Key, typename Value>
-class new_map
+class new_map 
 {
 public:
 	friend class iterator<Key, Value>;
@@ -31,9 +30,12 @@ public:
 	size_t size() const;
 	bool empty() const;
 	void clear();
+	void emplace(Key, Value);
 	void insert(Key, Value);
 	iterator* find(Key);
 	void print(std::ostream&);
+	iterator &operator=(Key);
+	iterator operator=(Value);
 	~new_map();
 };
 
@@ -75,7 +77,7 @@ class Element
 	bool operator<=(Element);
 	bool operator>=(Element);
 	bool operator<(Element);
-	bool operator>(Element);
+	bool operator>(Element)
 };
 
 template<typename Key, typename Value>
@@ -159,10 +161,10 @@ template<class nKey, class nValue>
 inline iterator<nKey, nValue> new_map<nKey, nValue>::end()
 {
 	size_t _index = m_dOccupiedSize;
-	while (m_pData[_index].m_status != Element::OCCUPIED &&
-		m_dOccupiedSize >= 0) --_index;
+	while (m_pData[_index].m_status == Element::OCCUPIED &&
+		--_index >= 0);
 
-	return &m_pData[_index - 1];
+	return &m_pData[_index];
 }
 
 template<typename Key, typename Value>
@@ -184,6 +186,17 @@ inline void new_map<Key, Value >::clear()
 	for (int i = 0; i < m_size; i++)
 		if (m_pData[i].m_status == Element::OCCUPIED)
 			m_pData[i].m_status = Element::NOT_OCCUPIED;
+}
+
+template<typename Key, typename Value>
+inline void new_map<Key, Value>::emplace(Key _key, Value _value)
+{
+	if (find(_key) != npos) {
+		npos; //замена значения
+	}
+	else{
+		insert(_key, _value);
+	}
 }
 
 template<typename Key, typename Value>
@@ -214,7 +227,6 @@ inline iterator<Key, Value>* new_map<Key, Value>::find(Key _key)
 				it = new iterator(&m_pData[i]);
 				return it;
 			}
-			//	return iterator(&m_pData[i]);
 
 	return &npos;
 }
@@ -224,6 +236,15 @@ inline void new_map<nKey, nValue>::print(std::ostream& _st)
 {
 	for (size_t i = 0; i < m_dOccupiedSize; i++)
 		_st << m_pData[i].m_key << " " << m_pData[i].m_value << '\n';
+}
+
+template<typename Key, typename Value>
+inline iterator<Key, Value> new_map<Key, Value>::operator=(Value _value)
+{
+	this->second = _value;
+	this->m_Data->m_value = _value;
+
+	return *this;
 }
 
 template<class nKey, class nValue>
@@ -244,6 +265,15 @@ template<class nKey, class nValue>
 inline iterator<nKey, nValue> & iterator<nKey, nValue>::operator=(Element * _data)
 {
 	m_Data = _data;
+	return *this;
+}
+
+template<class nKey, class nValue>
+inline iterator<nKey, nValue> &new_map<nKey, nValue>::operator=(nKey _key)
+{
+	this->first = _key;
+	this->m_Data->m_key = _key;
+
 	return *this;
 }
 
