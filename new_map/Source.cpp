@@ -15,7 +15,8 @@ int main()
 	for (; iter != it; iter++)
 		std::cout << iter.first << " ";
 
-	//std::cout << mapa.find(1)->second << std::endl;
+	std::cout << std::endl;
+	std::cout << mapa.find(1)->second << std::endl;
 
 	//mapa.print(std::cout);
 	getchar();

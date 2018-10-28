@@ -3,8 +3,7 @@
 template<typename Key, typename Value>
 class new_map 
 {
-public:
-	class iterator;
+public: class iterator;
 private:
 	class Element;
 	friend class iterator;
@@ -20,7 +19,6 @@ private:
 		null_ptr->m_status = Element::NULLPTR;
 		return iterator(null_ptr);
 	}
-
 	iterator *iter;
 public:
 	new_map();
@@ -65,38 +63,47 @@ template<class BasicKey, class BasicValue>
 class new_map<BasicKey, BasicValue>::iterator
 {
 	Element *m_Data;
+	void reData();
 public:
 	iterator() {}
 	iterator(Element *);
-	BasicKey *first;
-	BasicValue *second;
+	BasicKey first;
+	BasicValue second;
 
 	iterator &operator=(Element *_data) {
 		m_Data = _data;
-		first = &(*m_Data).m_key;
-		second = &(*m_Data).m_value;
+		first = (*m_Data).m_key;
+		second = (*m_Data).m_value;
 		return *this;
 	}
 	iterator operator++(int) {
 		if (m_Data) {
+			//*first++;
+			//*second++;
 			*m_Data++;
+			reData();
 			return *this;
 		}
 	}
 	iterator &operator++() {
 		if (m_Data) {
 			*m_Data++;
+			reData();
 			return *this;
 		}
 	}
 	iterator &operator--() {
 		if (m_Data) {
+			*first--;
+			*second--;
 			*m_Data--;
 			return *this;
 		}
 	}
 	iterator operator--(int) {
 		if (m_Data) {
+			*first--;
+			*second--;
 			*m_Data--;
 			return *this;
 		}
@@ -148,6 +155,7 @@ class new_map<BasicKey, BasicValue>::Element
 	bool operator>(Element _other) {
 		return this->m_key > _other.m_key;
 	}
+	
 };
 
 template<typename Key, typename Value>
@@ -272,10 +280,17 @@ inline new_map<Key, Value>::~new_map()
 	delete[] m_pData;
 }
 
+template<typename BasicKey, typename BasicValue>
+inline void new_map<BasicKey, BasicValue>::iterator::reData()
+{
+	first = (*m_Data).m_key;
+	second = (*m_Data).m_value;
+}
+
 template<typename Key, typename Value>
 inline new_map<Key, Value>::iterator::iterator(Element* _data)
 {
 	m_Data = _data;
-	first = &(*m_Data).m_key;
-	second = &(*m_Data).m_value;
+	first = (*_data).m_key;
+	second = (*_data).m_value;
 }
