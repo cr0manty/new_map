@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include "new_map.h"
+#include <map>
 
 int main()
 {
@@ -12,13 +13,14 @@ int main()
 	new_map<int, std::string>::iterator iter = mapa.begin();
 	new_map<int, std::string>::iterator it = mapa.end();
 	
+	//iter.second = si;
 	for (; iter != it; iter++)
-		std::cout << iter.first << " ";
+		std::cout << (*iter.first) << " ";
 
 	std::cout << std::endl;
-	std::cout << mapa.find(1)->second << std::endl;
+	std::cout << mapa.find(0)->second << std::endl;
 
-	//mapa.print(std::cout);
+	mapa.print(std::cout);
 	getchar();
 	return 0;
 }
