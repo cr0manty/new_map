@@ -3,8 +3,7 @@
 template<class Key, class Value>
 class new_map 
 {
-public: 
-	class iterator;
+public: class iterator;
 private:
 	class Element;
 	friend class iterator;
@@ -15,7 +14,6 @@ private:
 	void resize();
 	size_t m_begin;
 	iterator make_npos();
-	
 public:
 	new_map();
 	new_map(size_t);
@@ -37,8 +35,10 @@ public:
 template<class BasicKey, class BasicValue>
 class new_map<BasicKey, BasicValue>::iterator
 {
+	friend class new_map<BasicKey, BasicValue>;
 	Element *m_Data;
 	void _redata();
+	void _newdata(BasicKey, BasicValue);
 public:
 	iterator() {}
 	iterator(Element*);
@@ -49,30 +49,28 @@ public:
 	iterator &operator++();
 	iterator &operator--();
 	iterator operator--(int);
-	bool operator!=(iterator _other);
-	bool operator==(iterator _other);
-	bool operator<=(iterator _other);
-	bool operator>=(iterator _other);
-	bool operator<(iterator _other);
-	bool operator>(iterator _other);
+	bool operator!=(const iterator &_other);
+	bool operator==(const iterator &_other);
+	bool operator<=(const iterator &_other);
+	bool operator>=(const iterator &_other);
+	bool operator<(const iterator &_other);
+	bool operator>(const iterator &_other);
 };
 
 template<class BasicKey, class BasicValue>
 class new_map<BasicKey, BasicValue>::Element
 {
 	friend class new_map<BasicKey, BasicValue>;
-
 	BasicKey m_key;
 	BasicValue m_value;
 	enum { NOT_OCCUPIED, OCCUPIED, DELETED, NULLPTR } m_status;
 
-	bool operator==(Element _other);
-	bool operator!=(Element _other);
-	bool operator<=(Element _other);
-	bool operator>=(Element _other);
-	bool operator<(Element _other);
-	bool operator>(Element _other);
-	
+	bool operator==(const Element &_other);
+	bool operator!=(const Element &_other);
+	bool operator<=(const Element &_other);
+	bool operator>=(const Element &_other);
+	bool operator<(const Element &_other);
+	bool operator>(const Element &_other);
 };
 
 template<class Key, class Value>
@@ -166,15 +164,16 @@ inline void new_map<Key, Value >::clear()
 			m_pData[i].m_status = Element::NOT_OCCUPIED;
 }
 
-template<class Key, class Value>//
+template<class Key, class Value>
 inline void new_map<Key, Value>::emplace(Key _key, Value _value)
 {
-	if (find(_key) != npos) {
-		npos; //замена значения
-	}
-	else{
+	auto iter = find(_key);
+
+	if (iter != npos)
+		iter._newdata(_key, _value);
+
+	else
 		insert(_key, _value);
-	}
 }
 
 template<class Key, class Value>
@@ -241,6 +240,13 @@ inline void new_map<BasicKey, BasicValue>::iterator::_redata()
 	second = &(*m_Data).m_value;
 }
 
+template<class BasicKey, class BasicValue>
+inline void new_map<BasicKey, BasicValue>::iterator::_newdata(BasicKey _key, BasicValue _value)
+{
+	this->m_Data = Element(_key, _value);
+	_redata();
+}
+
 template<class Key, class Value>
 inline new_map<Key, Value>::iterator::iterator(Element* _data)
 {
@@ -297,73 +303,73 @@ inline typename new_map<BasicKey, BasicValue>::iterator new_map<BasicKey, BasicV
 }
 
 template<class BasicKey, class BasicValue>
-inline bool new_map<BasicKey, BasicValue>::iterator::operator!=(iterator _other)
+inline bool new_map<BasicKey, BasicValue>::iterator::operator!=(const iterator &_other)
 {
 	return (*m_Data != *_other.m_Data);
 }
 
 template<class BasicKey, class BasicValue>
-inline bool new_map<BasicKey, BasicValue>::iterator::operator==(iterator _other)
+inline bool new_map<BasicKey, BasicValue>::iterator::operator==(const iterator &_other)
 {
 	return (*m_Data == *_other.m_Data);
 }
 
 template<class BasicKey, class BasicValue>
-inline bool new_map<BasicKey, BasicValue>::iterator::operator<=(iterator _other)
+inline bool new_map<BasicKey, BasicValue>::iterator::operator<=(const iterator &_other)
 {
 	return (*m_Data <= *_other.m_Data);
 }
 
 template<class BasicKey, class BasicValue>
-inline bool new_map<BasicKey, BasicValue>::iterator::operator>=(iterator _other)
+inline bool new_map<BasicKey, BasicValue>::iterator::operator>=(const iterator &_other)
 {
 	return (*m_Data >= *_other.m_Data);
 }
 
 template<class BasicKey, class BasicValue>
-inline bool new_map<BasicKey, BasicValue>::iterator::operator<(iterator _other)
+inline bool new_map<BasicKey, BasicValue>::iterator::operator<(const iterator &_other)
 {
 	return (*m_Data < *_other.m_Data);
 }
 
 template<class BasicKey, class BasicValue>
-inline bool new_map<BasicKey, BasicValue>::iterator::operator>(iterator _other)
+inline bool new_map<BasicKey, BasicValue>::iterator::operator>(const iterator &_other)
 {
 	return (*m_Data > *_other.m_Data);
 }
 
 template<class BasicKey, class BasicValue>
-inline bool new_map<BasicKey, BasicValue>::Element::operator==(Element _other)
+inline bool new_map<BasicKey, BasicValue>::Element::operator==(const Element &_other)
 {
 	return this->m_key == _other.m_key;
 }
 
 template<class BasicKey, class BasicValue>
-inline bool new_map<BasicKey, BasicValue>::Element::operator!=(Element _other)
+inline bool new_map<BasicKey, BasicValue>::Element::operator!=(const Element &_other)
 {
 	return this->m_key != _other.m_key;
 }
 
 template<class BasicKey, class BasicValue>
-inline bool new_map<BasicKey, BasicValue>::Element::operator<=(Element _other)
+inline bool new_map<BasicKey, BasicValue>::Element::operator<=(const Element &_other)
 {
 	return this->m_key <= _other.m_key;
 }
 
 template<class BasicKey, class BasicValue>
-inline bool new_map<BasicKey, BasicValue>::Element::operator>=(Element _other)
+inline bool new_map<BasicKey, BasicValue>::Element::operator>=(const Element &_other)
 {
 	return this->m_key >= _other.m_key;
 }
 
 template<class BasicKey, class BasicValue>
-inline bool new_map<BasicKey, BasicValue>::Element::operator<(Element _other)
+inline bool new_map<BasicKey, BasicValue>::Element::operator<(const Element &_other)
 {
 	return this->m_key < _other.m_key;
 }
 
 template<class BasicKey, class BasicValue>
-inline bool new_map<BasicKey, BasicValue>::Element::operator>(Element _other)
+inline bool new_map<BasicKey, BasicValue>::Element::operator>(const Element &_other)
 {
 	return this->m_key > _other.m_key;
 }
