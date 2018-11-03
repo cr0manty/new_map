@@ -13,7 +13,7 @@ int main()
 	new_map<int, std::string>::iterator iter = mapa.begin();
 	new_map<int, std::string>::iterator it = mapa.end();
 	
-	//iter.second = si;
+	(*iter.second) = si;
 	for (; iter != it; iter++)
 		std::cout << (*iter.first) << " ";
 
