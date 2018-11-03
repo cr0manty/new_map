@@ -5,6 +5,7 @@
 
 int main()
 {
+	std::map<int, std::string>::iterator k;
 	new_map<int, std::string> mapa;
 	std::string si = "sis";
 	for (int i = 0; i < 4; i++)
@@ -13,9 +14,9 @@ int main()
 	new_map<int, std::string>::iterator iter = mapa.begin();
 	new_map<int, std::string>::iterator it = mapa.end();
 	
-	(*iter.second) = si;
+	iter.second = si;
 	for (; iter != it; iter++)
-		std::cout << (*iter.first) << " ";
+		std::cout << iter.first << " ";
 
 	//mapa.emplace(1, "sdsd");
 	std::cout << std::endl;
