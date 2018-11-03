@@ -60,10 +60,6 @@ class new_map<BasicKey, BasicValue>::iterator
 {
 	Element *m_Data;
 	void _redata();
-	struct miser {
-		BasicKey first;
-		BasicValue second;
-	} m_nValue;
 public:
 	iterator() {}
 	iterator(Element*);
