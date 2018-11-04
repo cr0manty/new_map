@@ -16,10 +16,10 @@ int main()
 	new_map<int, std::string>::iterator it = mapa.end();
 	
 	//iter.second = si;
-	for (; iter != it; iter++)
+	/*for (; iter != it; iter++)
 		std::cout << iter.first << " ";
-	iter.second = "sds";
-	//mapa.emplace(1, "sdsd");
+	iter.second = "sds";*/
+	mapa.emplace(10, "sdsd");
 	std::cout << std::endl;
 	std::cout << mapa.find(0)->second << std::endl;
 

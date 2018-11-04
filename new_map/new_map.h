@@ -12,7 +12,7 @@ private:
 	Element* m_pData;
 	bool _tryinsert(const size_t &, const Key &, const Value &);
 	void resize();
-	iterator make_npos() const;
+	iterator* make_npos() const;
 	
 public:
 	new_map();
@@ -22,7 +22,7 @@ public:
 	new_map &operator=(const new_map&);
 	new_map &operator=(new_map&&);
 
-	iterator npos;
+	iterator *npos;
 	size_t size() const;
 	bool empty() const;
 	void clear();
@@ -30,8 +30,8 @@ public:
 	void insert(const Key &, const Value &);
 	iterator* find(const Key &);
 	iterator* rfind(const Key &);
-	iterator begin() const;
-	iterator const end() const;
+	const iterator begin() const;
+	iterator end() const;
 	void print(std::ostream &);
 	~new_map();
 };
@@ -120,14 +120,12 @@ inline void new_map<Key, Value>::resize()
 }
 
 template<class Key, class Value>
-inline typename new_map<Key, Value>::iterator new_map<Key, Value>::make_npos() const
+inline typename new_map<Key, Value>::iterator* new_map<Key, Value>::make_npos() const
 {
 	Element null_ptr;
 	null_ptr.m_status = Element::NULLPTR;
-	null_ptr.m_key = Key("-1");
-	null_ptr.m_value = Value("-1");
 
-	return iterator(null_ptr);
+	return new iterator(null_ptr);
 }
 
 template<class Key, class Value>
@@ -225,7 +223,7 @@ inline void new_map<Key, Value>::emplace(const Key &_key, const Value &_value)
 	auto iter = find(_key);
 
 	if (iter != npos)
-		iter._newdata(_key, _value);
+		iter->_newdata(_key, _value);
 
 	else
 		insert(_key, _value);
@@ -254,7 +252,7 @@ inline typename new_map<Key, Value>::iterator* new_map<Key, Value>::find(const K
 			if (m_pData[i].m_key == _key)
 				return new iterator(m_pData[i]);
 
-	return &npos;
+	return npos;
 }
 
 template<class Key, class Value>
@@ -269,7 +267,7 @@ inline typename new_map<Key, Value>::iterator* new_map<Key, Value>::rfind(const 
 }
 
 template<class Key, class Value>
-inline typename new_map<Key, Value>::iterator new_map<Key, Value>::begin() const
+inline typename const new_map<Key, Value>::iterator new_map<Key, Value>::begin() const
 {
 	size_t m_begin = 0;
 
@@ -280,7 +278,7 @@ inline typename new_map<Key, Value>::iterator new_map<Key, Value>::begin() const
 }
 
 template<class Key, class Value>
-inline typename new_map<Key, Value>::iterator const new_map<Key, Value>::end() const
+inline typename new_map<Key, Value>::iterator new_map<Key, Value>::end() const
 {
 	size_t _index = m_dOccupiedSize;
 	while (m_pData[_index].m_status == Element::OCCUPIED &&
@@ -300,6 +298,7 @@ template<class Key, class Value>
 inline new_map<Key, Value>::~new_map()
 {
 	delete[] m_pData;
+	delete npos;
 }
 
 template<class BasicKey, class BasicValue>
@@ -312,13 +311,14 @@ inline void new_map<BasicKey, BasicValue>::iterator::_redata()
 template<class BasicKey, class BasicValue>
 inline void new_map<BasicKey, BasicValue>::iterator::_newdata(const BasicKey &_key, const BasicValue &_value)
 {
-	this->m_Data = Element(_key, _value);
+	(*m_Data).m_key = _key;
+	(*m_Data).m_value = _value;
 	_redata();
 }
 
 template<class BasicKey, class BasicValue>
 inline new_map<BasicKey, BasicValue>::iterator::iterator() :
-	m_Data(nullptr), first(nullptr), second(nullptr)
+	first((*m_Data).m_key), second((*m_Data).m_value)
 {
 }
 
@@ -364,7 +364,7 @@ template<class BasicKey, class BasicValue>
 inline typename new_map<BasicKey, BasicValue>::iterator new_map<BasicKey, BasicValue>::iterator::operator++(int)
 {
 	if (m_Data) {
-		*++m_Data;
+		*m_Data++;
 		_redata();
 		return *this;
 	}
@@ -374,7 +374,7 @@ template<class BasicKey, class BasicValue>
 inline typename new_map<BasicKey, BasicValue>::iterator & new_map<BasicKey, BasicValue>::iterator::operator++()
 {
 	if (m_Data) {
-		*m_Data++;
+		++*m_Data;
 		_redata();
 		return *this;
 	}
@@ -384,7 +384,7 @@ template<class BasicKey, class BasicValue>
 inline typename new_map<BasicKey, BasicValue>::iterator & new_map<BasicKey, BasicValue>::iterator::operator--()
 {
 	if (m_Data) {
-		*m_Data--;
+		*--m_Data;
 		_redata();
 		return *this;
 	}
@@ -394,7 +394,7 @@ template<class BasicKey, class BasicValue>
 inline typename new_map<BasicKey, BasicValue>::iterator new_map<BasicKey, BasicValue>::iterator::operator--(int)
 {
 	if (m_Data) {
-		*--m_Data;
+		*m_Data--;
 		_redata();
 		return *this;
 	}
