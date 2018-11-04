@@ -43,15 +43,15 @@ class new_map<BasicKey, BasicValue>::iterator
 	Element *m_Data;
 	void _redata();
 	void _newdata(const BasicKey &, const BasicValue &);
+	iterator(const iterator&) = 0;
 public:
 	BasicKey &first;
 	BasicValue &second;
 
 	//iterator() {}
 	iterator(Element &);
-	iterator(const iterator&);
+
 	iterator(iterator&&);
-	iterator &operator=(const iterator&);
 	iterator &operator=(iterator&&);
 
 	iterator &operator=(Element &);
@@ -292,7 +292,7 @@ inline typename new_map<Key, Value>::iterator const new_map<Key, Value>::end() c
 template<class Key, class Value>
 inline void new_map<Key, Value>::print(std::ostream& _st)
 {
-	for (size_t i = 1; i < m_dOccupiedSize; i++)
+	for (size_t i = 0; i < m_dOccupiedSize; i++)
 		_st << m_pData[i].m_key << " " << m_pData[i].m_value << '\n';
 }
 
@@ -329,20 +329,21 @@ inline new_map<BasicKey, BasicValue>::iterator::iterator(const iterator &_other)
 }
 
 template<class BasicKey, class BasicValue>
-inline new_map<BasicKey, BasicValue>::iterator::iterator(iterator &&_other)
+inline new_map<BasicKey, BasicValue>::iterator::iterator(iterator &&_other) :
+	m_Data(_other.m_Data), second(_other.second), first(_other.first)
 {
-}
-
-template<class BasicKey, class BasicValue>
-inline typename new_map<BasicKey, BasicValue>::iterator & new_map<BasicKey, BasicValue>::iterator::operator=(const iterator &_other)
-{
-	// TODO: вставьте здесь оператор return
+	delete[] _other.m_Data;
 }
 
 template<class BasicKey, class BasicValue>
 inline typename new_map<BasicKey, BasicValue>::iterator & new_map<BasicKey, BasicValue>::iterator::operator=(iterator &&_other)
 {
-	// TODO: вставьте здесь оператор return
+	m_Data = _other.m_Data;
+	first = _other.first;
+	second = _other.second;
+
+	delete[] _other.m_Data;
+	return *this;
 }
 
 template<class BasicKey, class BasicValue>
@@ -357,7 +358,7 @@ template<class BasicKey, class BasicValue>
 inline typename new_map<BasicKey, BasicValue>::iterator new_map<BasicKey, BasicValue>::iterator::operator++(int)
 {
 	if (m_Data) {
-		*m_Data++;
+		*++m_Data;
 		_redata();
 		return *this;
 	}
@@ -387,7 +388,7 @@ template<class BasicKey, class BasicValue>
 inline typename new_map<BasicKey, BasicValue>::iterator new_map<BasicKey, BasicValue>::iterator::operator--(int)
 {
 	if (m_Data) {
-		*m_Data--;
+		*--m_Data;
 		_redata();
 		return *this;
 	}
