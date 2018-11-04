@@ -43,14 +43,14 @@ class new_map<BasicKey, BasicValue>::iterator
 	Element *m_Data;
 	void _redata();
 	void _newdata(const BasicKey &, const BasicValue &);
-	iterator(const iterator&) = 0;
+
 public:
 	BasicKey &first;
 	BasicValue &second;
 
-	//iterator() {}
+	iterator();
 	iterator(Element &);
-
+	iterator(const iterator&);
 	iterator(iterator&&);
 	iterator &operator=(iterator&&);
 
@@ -132,7 +132,7 @@ inline typename new_map<Key, Value>::iterator new_map<Key, Value>::make_npos() c
 
 template<class Key, class Value>
 inline new_map<Key, Value>::new_map() :
-	m_size(100), m_dOccupiedSize(0), npos(make_npos())
+	m_size(100), npos(make_npos())
 {
 	m_pData = new Element[m_size];
 
@@ -241,7 +241,7 @@ inline void new_map<Key, Value>::insert(const Key &_key, const Value &_value)
 		if (_tryinsert(i, _key, _value))
 			return;
 
-	for (size_t i = 0; i < m_dOccupiedSize; i++)
+	for (size_t i = 1; i < m_dOccupiedSize; i++)
 		if (_tryinsert(i, _key, _value))
 			return;
 }
@@ -314,6 +314,12 @@ inline void new_map<BasicKey, BasicValue>::iterator::_newdata(const BasicKey &_k
 {
 	this->m_Data = Element(_key, _value);
 	_redata();
+}
+
+template<class BasicKey, class BasicValue>
+inline new_map<BasicKey, BasicValue>::iterator::iterator() :
+	m_Data(nullptr), first(nullptr), second(nullptr)
+{
 }
 
 template<class Key, class Value>
