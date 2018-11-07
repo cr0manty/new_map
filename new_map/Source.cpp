@@ -14,16 +14,20 @@ int main()
 
 	new_map<int, std::string>::iterator iter = mapa.begin();
 	new_map<int, std::string>::iterator it = mapa.end();
-	
+
 	(*iter).second = "kik";
 
-	for (; iter != it; iter++)
+	for (; iter != it; ++iter)
 		std::cout << (*iter).first << " ";
+
 	mapa.emplace(1, "sdsd");
 	std::cout << std::endl;
 	std::cout << mapa.find(0)->second << std::endl;
+	mapa.erase(iter);
 
-	mapa.print(std::cout);
+	for (auto i : mapa)
+		std::cout << i.first << " " << i.second << std::endl;
+
 	getchar();
 	return 0;
 }

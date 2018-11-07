@@ -1,4 +1,5 @@
-#pragma once
+#ifndef NEW_MAP_H
+#define NEW_MAP_H
 
 template<class Key, class Value>
 class new_map 
@@ -7,37 +8,37 @@ public: class iterator;
 private:
 	class Element;
 	size_t m_size;
-	size_t m_dOccupiedSize;
+	size_t m_nOccupied;
 	Element* m_pData;
 	bool _tryinsert(const size_t &, const Key &, const Value &);
-	void resize();
-	Element * make_npos() const;
-	
+	void resize();	
 public:
+	Element * const npos;
 	new_map();
 	new_map(const size_t &);
 	new_map(const new_map&);
 	new_map(new_map&&);
+
 	new_map &operator=(const new_map&);
 	new_map &operator=(new_map&&);
+	Element &operator[](const Key &);
 
-	Element * const npos;
 	size_t size() const;
 	bool empty() const;
+	void erase();
 	void clear();
 	void emplace(const Key &, const Value &);
 	void insert(const Key &, const Value &);
-	Element* find(const Key &);
-	iterator* rfind(const Key &);
+	Element* find(const Key &) const;
 	const iterator begin() const;
-	iterator end() const;
-	void print(std::ostream &);
+	const iterator end() const;
 	~new_map();
 };
 
 template<class BasicKey, class BasicValue>
 class new_map<BasicKey, BasicValue>::iterator
 {
+	friend class new_map<BasicKey, BasicValue>;
 	Element *m_Data;
 public:
 	iterator();
@@ -61,19 +62,17 @@ class new_map<BasicKey, BasicValue>::Element
 {
 	friend class new_map<BasicKey, BasicValue>;
 	enum STATUS{ NOT_OCCUPIED, OCCUPIED, DELETED, NULLPTR } m_status;
-	void _newdata(const BasicKey &, const BasicValue &);
 	bool operator==(const Element &);
 	bool const operator!=(const Element &) const;
 	operator bool();
-	Element(STATUS) {
-		m_status = NULLPTR;
-	}
+	Element(STATUS);
 	Element();
 public:
 	BasicKey first;
 	BasicValue second;
-
 };
+
+#endif
 
 template<class Key, class Value>
 inline bool new_map<Key, Value>::_tryinsert(const size_t &_index, const Key &_key, const Value &_value)
@@ -83,7 +82,7 @@ inline bool new_map<Key, Value>::_tryinsert(const size_t &_index, const Key &_ke
 		m_pData[_index].m_status = Element::OCCUPIED;
 		m_pData[_index].first = _key;
 		m_pData[_index].second = _value;
-		m_dOccupiedSize++;
+		m_nOccupied++;
 		return true;
 	}
 	else
@@ -100,11 +99,11 @@ inline void new_map<Key, Value>::resize()
 	for (int i = 0; i < m_size; i++)
 		m_pData[i].m_status = Element::NOT_OCCUPIED;
 
-	m_dOccupiedSize = 0;
+	m_nOccupied = 0;
 
 	for (size_t i = 0; i < oldSize; i++)
 		if (oldData[i].m_status == Element::OCCUPIED) {
-			if ((m_dOccupiedSize << 1) >= m_size)
+			if ((m_nOccupied << 1) >= m_size)
 				resize();
 
 			for (size_t j = i; j < m_size; j++)
@@ -120,15 +119,8 @@ inline void new_map<Key, Value>::resize()
 }
 
 template<class Key, class Value>
-inline typename new_map<Key, Value>::Element* new_map<Key, Value>::make_npos() const
-{
-	npos = new Element;
-	npos->m_status = Element::NULLPTR;
-}
-
-template<class Key, class Value>
 inline new_map<Key, Value>::new_map() :
-	m_size(100), npos(make_npos())
+	m_size(100), npos(new Element(Element::NULLPTR))
 {
 	m_pData = new Element[m_size];
 
@@ -137,7 +129,7 @@ inline new_map<Key, Value>::new_map() :
 
 template<class Key, class Value>
 inline new_map<Key, Value>::new_map(const size_t &_size) :
-	m_size(_size), m_dOccupiedSize(0), npos(make_npos())
+	m_size(_size), npos(new Element(Element::NULLPTR))
 {
 	m_pData = new Element[m_size];
 
@@ -149,9 +141,9 @@ inline new_map<Key, Value>::new_map(const new_map &_other)
 {
 	m_size = _other.m_size;
 	m_pData = new Element[m_size];
-	m_dOccupiedSize = _other.m_dOccupiedSize;
+	m_nOccupied = _other.m_nOccupied;
 
-	for (size_t i = 0; i < m_dOccupiedSize; i++)
+	for (size_t i = 0; i < m_nOccupied; i++)
 		_tryinsert(i, _other.m_pData[i].first, _other.m_pData[i].second);
 
 	return *this;
@@ -160,11 +152,11 @@ inline new_map<Key, Value>::new_map(const new_map &_other)
 template<class Key, class Value>
 inline new_map<Key, Value>::new_map(new_map &&_other):
 	m_pData(_other.m_pData), m_size(_other.m_size),
-	m_dOccupiedSize(_other.m_dOccupiedSize)
+	m_nOccupied(_other.m_nOccupied)
 {
 	delete[]_other.m_pData;
 	_other.m_size = 0;
-	m_dOccupiedSize.m_nUsed = 0;
+	m_nOccupied.m_nUsed = 0;
 }
 
 template<class Key, class Value>
@@ -172,9 +164,9 @@ inline new_map<Key, Value> & new_map<Key, Value>::operator=(const new_map &_othe
 {
 	m_size = _other.m_size;
 	m_pData = new Element[m_size];
-	m_dOccupiedSize = _other.m_dOccupiedSize;
+	m_nOccupied = _other.m_nOccupied;
 
-	for (size_t i = 0; i < m_dOccupiedSize; i++)
+	for (size_t i = 0; i < m_nOccupied; i++)
 		_tryinsert(i, _other.m_pData[i].first, _other.m_pData[i].second);
 
 	return *this;
@@ -185,33 +177,47 @@ inline new_map<Key, Value> & new_map<Key, Value>::operator=(new_map &&_other)
 {
 	m_pData = _other.m_pData;
 	m_size = _other.m_size;
-	m_dOccupiedSize = _other.m_dOccupiedSize;
+	m_nOccupied = _other.m_nOccupied;
 
 	delete[] _other.m_pData;
-	_other.m_dOccupiedSize = 0;
+	_other.m_nOccupied = 0;
 	_other.m_size = 0;
 
 	return *this;
 }
 
 template<class Key, class Value>
+inline typename new_map<Key, Value>::Element & new_map<Key, Value>::operator[](const Key &_key)
+{
+	return find(_key);
+}
+
+template<class Key, class Value>
 inline size_t new_map<Key, Value>::size() const
 {
-	return m_dOccupiedSize;
+	return m_nOccupied;
 }
 
 template<class Key, class Value>
 inline bool new_map<Key, Value>::empty() const
 {
-	return m_dOccupiedSize;
+	return m_nOccupied;
+}
+
+template<class Key, class Value>
+inline void new_map<Key, Value>::erase()
+{
+	m_nOccupied = 0;
+	delete[] m_pData;
+	m_pData = new Element[m_size];
 }
 
 template<class Key, class Value>
 inline void new_map<Key, Value >::clear()
 {
-	m_dOccupiedSize = 0;
+	m_nOccupied = 0;
 	for (int i = 0; i < m_size; i++)
-		if (m_pData[i].m_status == Element::OCCUPIED)
+		if (m_pData[i].m_status != Element::OCCUPIED)
 			m_pData[i].m_status = Element::NOT_OCCUPIED;
 }
 
@@ -220,8 +226,10 @@ inline void new_map<Key, Value>::emplace(const Key &_key, const Value &_value)
 {
 	auto iter = find(_key);
 
-	if (iter != npos)
-		iter->_newdata(_key, _value);
+	if (iter != npos) {
+		iter->first = _key;
+		iter->second = _value;
+	}
 	else
 		insert(_key, _value);
 }
@@ -229,36 +237,35 @@ inline void new_map<Key, Value>::emplace(const Key &_key, const Value &_value)
 template<class Key, class Value>
 inline void new_map<Key, Value>::insert(const Key &_key, const Value &_value)
 {
-	if ((m_dOccupiedSize << 1) >= m_size)
+	if ((m_nOccupied << 1) >= m_size)
 		this->resize();
 
-	for (size_t i = m_dOccupiedSize; i < m_size; i++)
+	for (size_t i = m_nOccupied; i < m_size; i++)
 		if (_tryinsert(i, _key, _value))
 			return;
 
-	for (size_t i = 1; i < m_dOccupiedSize; i++)
+	for (size_t i = 1; i < m_nOccupied; i++)
 		if (_tryinsert(i, _key, _value))
 			return;
 }
 
 template<class Key, class Value>
-inline typename new_map<Key, Value>::Element* new_map<Key, Value>::find(const Key &_key)
+inline typename new_map<Key, Value>::Element* new_map<Key, Value>::find(const Key &_key) const
 {
-	for (size_t i = 0; i < m_dOccupiedSize; i++)
-		if (m_pData[i].m_status == Element::OCCUPIED)
-			if (m_pData[i].first == _key)
-				return &m_pData[i];
 
-	return npos;
-}
+	for (int i = m_nOccupied; i < m_size; i++)
+		if (m_pData[i].m_status == Element::NOT_OCCUPIED)
+			break;
+		else if (m_pData[i].m_status == Element::OCCUPIED &&
+			m_pData[i].first == _key)
+			return &m_pData[i];
 
-template<class Key, class Value>
-inline typename new_map<Key, Value>::iterator* new_map<Key, Value>::rfind(const Key &_key)
-{
-	for (size_t i = m_dOccupiedSize; i > 0; i--)
-		if (m_pData[i].m_status == Element::OCCUPIED)
-			if (m_pData[i].first == _key)
-				return &m_pData[i];
+	for (int i = 0; i < m_nOccupied; i++)
+		if (m_pData[i].m_status == Element::NOT_OCCUPIED)
+			break;
+		else if (m_pData[i].m_status == Element::OCCUPIED &&
+				m_pData[i].first == _key)
+			return &m_pData[i];
 
 	return npos;
 }
@@ -269,35 +276,22 @@ inline typename const new_map<Key, Value>::iterator new_map<Key, Value>::begin()
 	size_t m_begin = 0;
 
 	while (m_pData[m_begin].m_status != Element::OCCUPIED &&
-		m_dOccupiedSize >= m_begin) m_begin++;
+		m_nOccupied >= m_begin) m_begin++;
 
 	return &m_pData[m_begin];
 }
 
 template<class Key, class Value>
-inline typename new_map<Key, Value>::iterator new_map<Key, Value>::end() const
+inline typename const new_map<Key, Value>::iterator new_map<Key, Value>::end() const
 {
-	return &m_pData[m_dOccupiedSize];
-}
-
-template<class Key, class Value>
-inline void new_map<Key, Value>::print(std::ostream& _st)
-{
-	for (size_t i = 0; i < m_dOccupiedSize; i++)
-		_st << m_pData[i].first << " " << m_pData[i].second << '\n';
+	return &m_pData[m_nOccupied];
 }
 
 template<class Key, class Value>
 inline new_map<Key, Value>::~new_map()
 {
+	delete npos;
 	delete[] m_pData;
-}
-
-template<class BasicKey, class BasicValue>
-inline void new_map<BasicKey, BasicValue>::Element::_newdata(const BasicKey &_key, const BasicValue &_value)
-{
-	first = _key;
-	second = _value;
 }
 
 template<class BasicKey, class BasicValue>
@@ -399,6 +393,11 @@ inline new_map<BasicKey, BasicValue>::Element::Element()
 {
 }
 
+template<class BasicKey, class BasicValue>
+inline new_map<BasicKey, BasicValue>::Element::Element(STATUS _status)
+{
+	m_status = _status;
+}
 
 template<class BasicKey, class BasicValue>
 inline bool new_map<BasicKey, BasicValue>::Element::operator==(const Element &_other)
