@@ -35,8 +35,9 @@ public:
 	void erase(const Key &);
 	void insert(const Key &, const Value &);
 	Element* find(const Key &) const;
+	Element* vfind(const Value &) const;
 	iterator begin() const;
-	iterator end() const;//
+	iterator end();//
 	~new_map();
 };
 
@@ -98,7 +99,7 @@ inline void new_map<Key, Value>::_transplant(Element *_node, Element *_otherNode
 {
 	if (!_node->m_parent)
 	{
-		//assert(_node == _tree.m_pRoot);
+		assert(_node == m_pData);
 		m_pData = _otherNode;
 	}
 
@@ -108,8 +109,8 @@ inline void new_map<Key, Value>::_transplant(Element *_node, Element *_otherNode
 	else if (_node->m_parent->m_right == _node)
 		_node->m_parent->m_right = _otherNode;
 
-	//else
-	//	assert(0);
+	else
+		assert(0);
 
 	if (_otherNode)
 		_otherNode->m_parent = _node->m_parent;
@@ -436,15 +437,35 @@ inline typename new_map<Key, Value>::Element* new_map<Key, Value>::find(const Ke
 }
 
 template<class Key, class Value>
+inline typename new_map<Key, Value>::Element * new_map<Key, Value>::vfind(const Value & _value) const
+{
+	Element * _current = m_pData;
+
+	while (_current)
+	{
+		if (_value == _current->second)
+			return _current;
+
+		else if (_value < _current->second)
+			_current = _current->m_left;
+
+		else
+			_current = _current->m_right;
+	}
+
+	return npos;
+}
+
+template<class Key, class Value>
 inline typename new_map<Key, Value>::iterator new_map<Key, Value>::begin() const
 {
 	return m_pData;
 }
 
 template<class Key, class Value>
-inline typename new_map<Key, Value>::iterator new_map<Key, Value>::end() const
+inline typename new_map<Key, Value>::iterator new_map<Key, Value>::end()
 {
-	return nullptr; // mistake
+	return max();
 }
 
 template<class Key, class Value>

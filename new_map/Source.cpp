@@ -12,15 +12,13 @@ int main()
 	for (int i = 5; i < 10; i++)
 		mapa.insert(i, "sss");
 
-	/*new_map<int, std::string>::iterator iter = mapa.begin();
+	new_map<int, std::string>::iterator iter = mapa.begin();
 	new_map<int, std::string>::iterator it = mapa.end();
 
 	(*iter).second = "kik";
 
 	for (; iter != it; ++iter)
 		std::cout << (*iter).first << " ";
-
-	mapa.emplace(1, "sdsd");*/
 
 	/*std::cout << mapa[1].first << std::endl;
 	std::cout << mapa.find(0)->second << std::endl;*/
@@ -29,8 +27,10 @@ int main()
 	if (mapa.find(5) != mapa.npos)
 		std::cout << "npos" << std::endl;
 
-	new_map<int, std::string>::iterator it = mapa.begin();
-	std::cout << (*it).first;
+	std::cout << mapa.vfind("sds")->first << std::endl;
+
+	/*new_map<int, std::string>::iterator it = mapa.begin();
+	std::cout << (*it).first;*/
 
 
 	getchar();
