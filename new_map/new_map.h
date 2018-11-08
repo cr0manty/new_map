@@ -11,9 +11,8 @@ private:
 	Element* m_pData;
 	void _destroy(Element*);
 	void _transplant(Element *, Element*); 
-	Element* _minimumNode();
 	Element* _maximumNode();
-
+	Element* _minimumNode();
 public:
 	Element * const npos;
 	new_map();
@@ -27,7 +26,6 @@ public:
 	size_t size() const;
 	bool empty() const;
 	void erase(const Key &);
-	void emplace(const Key &, const Value &);//
 	void insert(const Key &, const Value &);
 	Element* find(const Key &) const;
 	iterator begin() const;
@@ -112,7 +110,10 @@ inline void new_map<Key, Value>::_transplant(Element *_node, Element *_otherNode
 template<class Key, class Value>
 inline typename new_map<Key, Value>::Element* new_map<Key, Value>::_minimumNode()
 {
-	Element * _node = _minimumNode();
+	Element * _node = m_pData;
+	while (_node && _node->m_left)
+		_node = _node->m_left;
+
 	return _node;
 }
 
@@ -211,19 +212,6 @@ inline void new_map<Key, Value>::erase(const Key &_key)
 	}
 
 	delete _node;
-}
-
-template<class Key, class Value>
-inline void new_map<Key, Value>::emplace(const Key &_key, const Value &_value)
-{
-	auto iter = find(_key);
-
-	/*if (iter != npos) {
-		iter->first = _key;
-		iter->second = _value;
-	}
-	else*/
-		insert(_key, _value);
 }
 
 template<class Key, class Value>
