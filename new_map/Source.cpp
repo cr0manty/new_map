@@ -25,13 +25,13 @@ int main()
 	/*std::cout << mapa[1].first << std::endl;
 	std::cout << mapa.find(0)->second << std::endl;*/
 	mapa.insert(0, "sds");
-	if (mapa.find(1) == mapa.npos)
+	mapa.erase(5);
+	if (mapa.find(5) != mapa.npos)
 		std::cout << "npos" << std::endl;
 
 	new_map<int, std::string>::iterator it = mapa.begin();
 	std::cout << (*it).first;
-	//for (auto i : mapa)
-	//	std::cout << i.first << " " << i.second << std::endl;
+
 
 	getchar();
 	return 0;

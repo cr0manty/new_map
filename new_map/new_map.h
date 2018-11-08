@@ -1,5 +1,6 @@
 #ifndef NEW_MAP_H
 #define NEW_MAP_H
+#include <cassert>
 
 template<class Key, class Value>
 class new_map 
@@ -7,21 +8,27 @@ class new_map
 public: class iterator;
 private:
 	class Element;
+	enum Color { RED, BLACK };
 	size_t m_size;
 	Element* m_pData;
 	void _destroy(Element*);
 	void _transplant(Element *, Element*); 
-	Element* _maximumNode();
-	Element* _minimumNode();
+	Element* _tryinsert(const Key &, const Value &);
+	Color _getcolor(const Element*);
+	void _leftRotate(Element*);
+	void _rightRotate(Element*);
 public:
 	Element * const npos;
 	new_map();
-	new_map(const new_map&);//
+	new_map(const new_map&);
 	new_map(new_map&&);
 
-	new_map &operator=(const new_map&);//
+	new_map &operator=(const new_map&);
 	new_map &operator=(new_map&&);
 	Element &operator[](const Key &);
+
+	Element* max();
+	Element* min();
 
 	size_t size() const;
 	bool empty() const;
@@ -60,6 +67,7 @@ class new_map<BasicKey, BasicValue>::Element
 {
 	friend class new_map<BasicKey, BasicValue>;
 	Element(const BasicKey &, const BasicValue &);
+	Color m_color;
 	Element * m_parent;
 	Element * m_left;
 	Element * m_right;
@@ -108,7 +116,7 @@ inline void new_map<Key, Value>::_transplant(Element *_node, Element *_otherNode
 }
 
 template<class Key, class Value>
-inline typename new_map<Key, Value>::Element* new_map<Key, Value>::_minimumNode()
+inline typename new_map<Key, Value>::Element* new_map<Key, Value>::min()
 {
 	Element * _node = m_pData;
 	while (_node && _node->m_left)
@@ -118,7 +126,63 @@ inline typename new_map<Key, Value>::Element* new_map<Key, Value>::_minimumNode(
 }
 
 template<class Key, class Value>
-inline typename new_map<Key, Value>::Element* new_map<Key, Value>::_maximumNode()
+inline typename new_map<Key, Value>::Color new_map<Key, Value>::_getcolor(const Element *_node)
+{
+	return (_node) ? _node->m_color : Color::BLACK;
+}
+
+template<class Key, class Value>
+inline void new_map<Key, Value>::_leftRotate(Element *_left)
+{
+	Element* right = _left->m_right;
+	if (!right)
+		return;
+
+	_left->m_right = right->m_left;
+	if (_left->m_right)
+		_left->m_right->m_parent = _left;
+
+	right->m_parent = _left->m_parent;
+	if (!right->m_parent)
+		m_pData = right;
+	else if (_left == _left->m_parent->m_left)
+		_left->m_parent->m_left = right;
+	else if (_left == _left->m_parent->m_right)
+		_left->m_parent->m_right = right;
+	else
+		assert(0);
+
+	right->m_left = _left;
+	_left->m_parent = right;
+}
+
+template<class Key, class Value>
+inline void new_map<Key, Value>::_rightRotate(Element *_right)
+{
+	Element* left = _right->m_left;
+	if (!left)
+		return;
+
+	_right->m_left = left->m_right;
+	if (_right->m_left)
+		_right->m_left->m_parent = _right;
+
+	left->m_parent = _right->m_parent;
+	if (!left->m_parent)
+		m_pData = left;
+	else if (_right == _right->m_parent->m_left)
+		_right->m_parent->m_left = left;
+	else if (_right == _right->m_parent->m_right)
+		_right->m_parent->m_right = left;
+	else
+		assert(0);
+
+	left->m_right = _right;
+	_right->m_parent = left;
+}
+
+template<class Key, class Value>
+inline typename new_map<Key, Value>::Element* new_map<Key, Value>::max()
 {
 	Element * _node = m_pData;
 	while (_node && _node->m_right)
@@ -136,29 +200,42 @@ inline new_map<Key, Value>::new_map() :
 template<class Key, class Value>
 inline new_map<Key, Value>::new_map(const new_map &_other)
 {
-	m_size = _other.m_size;
+	if (m_pData)
+		_destroy(m_pData);
+
 	m_pData = _other.m_pData;
+	m_size = _other.m_size;
+
 	return *this;
 }
 
 template<class Key, class Value>
 inline new_map<Key, Value>::new_map(new_map &&_other):
-	m_pData(_other.m_pData), m_size(_other.m_size)
+	m_size(_other.m_size)
 {
+	if (m_pData)
+		_destroy(m_pData);
+
+	m_pData = _other.m_pData;
 }
 
 template<class Key, class Value>
 inline new_map<Key, Value> & new_map<Key, Value>::operator=(const new_map &_other)
 {
-	m_size = _other.m_size;
-	m_pData = _other.m_pData;
+	if (m_pData)
+		_destroy(m_pData);
 
+	m_pData = _other.m_pData;
+	m_size = _other.m_size;
 	return *this;
 }
 
 template<class Key, class Value>
 inline new_map<Key, Value> & new_map<Key, Value>::operator=(new_map &&_other)
 {
+	if (m_pData)
+		_destroy(m_pData);
+
 	m_pData = _other.m_pData;
 	m_size = _other.m_size;
 
@@ -198,7 +275,7 @@ inline void new_map<Key, Value>::erase(const Key &_key)
 
 	else
 	{
-		Element *_newxtNode = _minimumNode();
+		Element *_newxtNode = min();
 		if (_newxtNode->m_parent != _node)
 		{
 			_transplant(_newxtNode, _newxtNode->m_right);
@@ -212,25 +289,99 @@ inline void new_map<Key, Value>::erase(const Key &_key)
 	}
 
 	delete _node;
+	m_size--;
 }
 
 template<class Key, class Value>
 inline void new_map<Key, Value>::insert(const Key &_key, const Value &_value)
 {
-	m_size++;
+	Element * x = _tryinsert(_key,_value);
+	if (!x)
+		return;
 
+	Element * p;
+	while (x && (p = x->m_parent) && _getcolor(p) == Color::RED)
+	{
+		Element* pp = p->m_parent;
+		if (p == pp->m_left)
+		{
+			Element* y = pp->m_right;
+			if (_getcolor(y) == Color::RED)
+			{
+				p->m_color = Color::BLACK;
+				y->m_color = Color::BLACK;
+				pp->m_color = Color::RED;
+				x = pp;
+			}
+			else
+			{
+				if (x == p->m_right)
+				{
+					x = p;
+					_leftRotate(x);
+				}
+
+				p = x->m_parent;
+				pp = p->m_parent;
+
+				p->m_color = Color::BLACK;
+				if (pp)
+				{
+					pp->m_color = Color::RED;
+					_rightRotate(pp);
+				}
+			}
+		}
+		else
+		{
+			Element* y = pp->m_left;
+			if (_getcolor(y) == Color::RED)
+			{
+				p->m_color = Color::BLACK;
+				y->m_color = Color::BLACK;
+				pp->m_color = Color::RED;
+				x = pp;
+			}
+			else
+			{
+				if (x == p->m_left)
+				{
+					x = p;
+					_rightRotate(x);
+				}
+
+				p = x->m_parent;
+				pp = p->m_parent;
+
+				p->m_color = Color::BLACK;
+				if (pp)
+				{
+					pp->m_color = Color::RED;
+					_leftRotate(pp);
+				}
+			}
+		}
+	}
+
+	m_size++;
+	m_pData->m_color = Color::BLACK;
+}
+
+template<class Key, class Value>
+inline typename new_map<Key,Value>::Element* new_map<Key, Value>::_tryinsert(const Key &_key, const Value &_value)
+{
 	Element * _current = m_pData;
 	
 	if (!_current)
 	{
 		m_pData = new Element(_key, _value);
-		return;
+		return m_pData;
 	}
 
 	while (_current)
 	{
 		if (_current->first == _key)
-			return;
+			return nullptr;
 
 		else if (_key < _current->first)
 		{
@@ -242,7 +393,7 @@ inline void new_map<Key, Value>::insert(const Key &_key, const Value &_value)
 				Element * _newNode = new Element(_key, _value);
 				_newNode->m_parent = _current;
 				_current->m_left = _newNode;
-				return;
+				return _newNode;
 			}
 		}
 
@@ -253,13 +404,15 @@ inline void new_map<Key, Value>::insert(const Key &_key, const Value &_value)
 
 			else
 			{
-				Element* pNewNode = new Element(_key, _value);
-				pNewNode->m_parent = _current;
-				_current->m_right = pNewNode;
-				return;
+				Element* _newNode = new Element(_key, _value);
+				_newNode->m_parent = _current;
+				_current->m_right = _newNode;
+				return _newNode;
 			}
 		}
 	}
+
+	return nullptr;
 }
 
 template<class Key, class Value>
@@ -291,7 +444,7 @@ inline typename new_map<Key, Value>::iterator new_map<Key, Value>::begin() const
 template<class Key, class Value>
 inline typename new_map<Key, Value>::iterator new_map<Key, Value>::end() const
 {
-	return _maximumNode();
+	return nullptr; // mistake
 }
 
 template<class Key, class Value>
@@ -312,24 +465,31 @@ inline new_map<Key, Value>::iterator::iterator(Element * _data) :
 }
 
 template<class BasicKey, class BasicValue>
-inline new_map<BasicKey, BasicValue>::iterator::iterator(const iterator &_other) :
-	m_Data(_other.m_Data)
+inline new_map<BasicKey, BasicValue>::iterator::iterator(const iterator &_other)
 {
+	if(m_Data)
+		delete m_Data;
+
+	m_Data = _other.m_Data;
 }
 
 template<class BasicKey, class BasicValue>
-inline new_map<BasicKey, BasicValue>::iterator::iterator(iterator &&_other) :
-	m_Data(_other.m_Data)
+inline new_map<BasicKey, BasicValue>::iterator::iterator(iterator &&_other)
 {
-	delete[] _other.m_Data;
+	if (m_Data)
+		delete m_Data;
+
+	m_Data = _other.m_Data;
 }
 
 template<class BasicKey, class BasicValue>
 inline typename new_map<BasicKey, BasicValue>::iterator & new_map<BasicKey, BasicValue>::iterator::operator=(iterator &&_other)
 {
+	if (m_Data)
+		delete m_Data;
+
 	m_Data = _other.m_Data;
 
-	delete[] _other.m_Data;
 	return *this;
 }
 
@@ -396,7 +556,7 @@ inline bool new_map<BasicKey, BasicValue>::iterator::operator==(const iterator &
 
 template<class BasicKey, class BasicValue>
 inline new_map<BasicKey, BasicValue>::Element::Element(const BasicKey & _key, const BasicValue & _value) :
-	first(_key), second(_value), m_parent(nullptr), m_left(nullptr), m_right(nullptr)
+	first(_key), second(_value), m_parent(nullptr), m_left(nullptr), m_right(nullptr), m_color(Color::RED)
 {
 }
 
