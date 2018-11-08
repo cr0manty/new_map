@@ -296,69 +296,69 @@ inline void new_map<Key, Value>::erase(const Key &_key)
 template<class Key, class Value>
 inline void new_map<Key, Value>::insert(const Key &_key, const Value &_value)
 {
-	Element * x = _tryinsert(_key,_value);
-	if (!x)
+	Element * _newElement = _tryinsert(_key,_value);
+	if (!_newElement)
 		return;
 
-	Element * p;
-	while (x && (p = x->m_parent) && _getcolor(p) == Color::RED)
+	Element * _parent;
+	while (_newElement && (_parent = _newElement->m_parent) && _getcolor(_parent) == Color::RED)
 	{
-		Element* pp = p->m_parent;
-		if (p == pp->m_left)
+		Element* _new_parent = _parent->m_parent;
+		if (_parent == _new_parent->m_left)
 		{
-			Element* y = pp->m_right;
-			if (_getcolor(y) == Color::RED)
+			Element* right = _new_parent->m_right;
+			if (_getcolor(right) == Color::RED)
 			{
-				p->m_color = Color::BLACK;
-				y->m_color = Color::BLACK;
-				pp->m_color = Color::RED;
-				x = pp;
+				_parent->m_color = Color::BLACK;
+				right->m_color = Color::BLACK;
+				_new_parent->m_color = Color::RED;
+				_newElement = _new_parent;
 			}
 			else
 			{
-				if (x == p->m_right)
+				if (_newElement == _parent->m_right)
 				{
-					x = p;
-					_leftRotate(x);
+					_newElement = _parent;
+					_leftRotate(_newElement);
 				}
 
-				p = x->m_parent;
-				pp = p->m_parent;
+				_parent = _newElement->m_parent;
+				_new_parent = _parent->m_parent;
 
-				p->m_color = Color::BLACK;
-				if (pp)
+				_parent->m_color = Color::BLACK;
+				if (_new_parent)
 				{
-					pp->m_color = Color::RED;
-					_rightRotate(pp);
+					_new_parent->m_color = Color::RED;
+					_rightRotate(_new_parent);
 				}
 			}
 		}
 		else
 		{
-			Element* y = pp->m_left;
-			if (_getcolor(y) == Color::RED)
+			Element* left = _new_parent->m_left;
+			if (_getcolor(left) == Color::RED)
 			{
-				p->m_color = Color::BLACK;
-				y->m_color = Color::BLACK;
-				pp->m_color = Color::RED;
-				x = pp;
+				_parent->m_color = Color::BLACK;
+				left->m_color = Color::BLACK;
+				_new_parent->m_color = Color::RED;
+				_newElement = _new_parent;
 			}
 			else
 			{
-				if (x == p->m_left)
+				if (_newElement == _parent->m_left)
 				{
-					x = p;
-					_rightRotate(x);
+					_newElement = _parent;
+					_rightRotate(_newElement);
 				}
 
-				p = x->m_parent;
-				pp = p->m_parent;
+				_parent = _newElement->m_parent;
+				_new_parent = _parent->m_parent;
 
-				p->m_color = Color::BLACK;
-				if (pp)
+				_parent->m_color = Color::BLACK;
+				if (_new_parent)
 				{
-					pp->m_color = Color::RED;
-					_leftRotate(pp);
+					_new_parent->m_color = Color::RED;
+					_leftRotate(_new_parent);
 				}
 			}
 		}
