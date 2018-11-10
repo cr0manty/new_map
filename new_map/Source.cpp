@@ -16,11 +16,11 @@ int main()
 	std::new_map<int, std::string>::iterator iter = mapa.begin();
 	std::new_map<int, std::string>::iterator it = mapa.end();
 
-	(*iter).second = "kik";
+	//(*iter).second = "kik";
 	
-	/*for (; iter != it; ++iter)
+	for (; iter != it; ++iter)
 		std::cout << (*iter).first << " ";
-*/
+
 	std::cout << mapa[1].first << std::endl;
 	std::cout << mapa.find(0)->second << std::endl;
 

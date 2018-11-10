@@ -40,28 +40,11 @@ namespace std {
 	};
 
 	template<class BasicKey, class BasicValue>
-	class new_map<BasicKey, BasicValue>::Element
-	{
-		friend class new_map<BasicKey, BasicValue>;
-		Element(const BasicKey &, const BasicValue &);
-		Element();
-		Color m_color;
-		Element * m_parent;
-		Element * m_left;
-		Element * m_right;
-		bool operator==(const Element &);
-		bool const operator!=(const Element &) const;
-		operator bool();
-	public:
-		BasicKey first;
-		BasicValue second;
-	};
-
-	template<class BasicKey, class BasicValue>
 	class new_map<BasicKey, BasicValue>::iterator
 	{
 		friend class new_map<BasicKey, BasicValue>;
 		Element *m_Data;
+		Element* m_current;
 	public:
 		iterator();
 		iterator(Element *);
@@ -77,6 +60,24 @@ namespace std {
 		iterator operator--(int);
 		bool operator!=(const iterator &) const;
 		bool operator==(const iterator &) const;
+	};
+
+	template<class BasicKey, class BasicValue>
+	class new_map<BasicKey, BasicValue>::Element
+	{
+		friend class new_map<BasicKey, BasicValue>;
+		Element(const BasicKey &, const BasicValue &);
+		Element();
+		Color m_color;
+		Element * m_parent;
+		Element * m_left;
+		Element * m_right;
+		bool operator==(const Element &);
+		bool const operator!=(const Element &) const;
+		operator bool();
+	public:
+		BasicKey first;
+		BasicValue second;
 	};
 }
 #endif
@@ -462,36 +463,6 @@ inline std::new_map<Key, Value>::~new_map()
 }
 
 template<class BasicKey, class BasicValue>
-inline std::new_map<BasicKey, BasicValue>::Element::Element(const BasicKey & _key, const BasicValue & _value) :
-	first(_key), second(_value), m_parent(nullptr), m_left(nullptr), m_right(nullptr), m_color(Color::RED)
-{
-}
-
-template<class BasicKey, class BasicValue>
-inline std::new_map<BasicKey, BasicValue>::Element::Element() :
-	first(BasicKey()), second(BasicValue()), m_parent(nullptr), m_left(nullptr), m_right(nullptr), m_color(Color::BLACK)
-{
-}
-
-template<class BasicKey, class BasicValue>
-inline bool std::new_map<BasicKey, BasicValue>::Element::operator==(const Element &_other)
-{
-	return this->first == _other.first;
-}
-
-template<class BasicKey, class BasicValue>
-inline const bool std::new_map<BasicKey, BasicValue>::Element::operator!=(const Element &_other) const
-{
-	return this->first != _other.first;
-}
-
-template<class BasicKey, class BasicValue>
-inline std::new_map<BasicKey, BasicValue>::Element::operator bool()
-{
-	return this;
-}
-
-template<class BasicKey, class BasicValue>
 inline std::new_map<BasicKey, BasicValue>::iterator::iterator() :
 	m_Data(nullptr)
 {
@@ -548,7 +519,34 @@ inline typename std::new_map<BasicKey, BasicValue>::iterator & std::new_map<Basi
 template<class BasicKey, class BasicValue>
 inline typename std::new_map<BasicKey, BasicValue>::iterator & std::new_map<BasicKey, BasicValue>::iterator::operator++()
 {
-	//TODO
+	m_current = m_Data;
+	Element* previous = nullptr;
+
+	if (previous == m_current->m_parent) { // Traversing down the tree.
+		previous = m_current;
+		if (m_current->m_left) {
+			m_current = m_current->m_left;
+		}
+		else {
+			//cout << ' ' << current->data;
+			if (m_current->m_right)
+				m_current = m_current->m_right;
+			else
+				m_current = m_current->m_parent;
+		}
+	}
+	else if (previous == m_current->m_left) { // Traversing up the tree from the left.
+		previous = m_current;
+	//	cout << ' ' << current->data;
+		if (m_current->m_right)
+			m_current = m_current->m_right;
+		else
+			m_current = m_current->m_parent;
+	}
+	else if (previous == m_current->m_right) { // Traversing up the tree from the right.
+		previous = m_current;
+		m_current = m_current->m_parent;
+	}
 	return *this;
 }
 
@@ -562,4 +560,34 @@ template<class BasicKey, class BasicValue>
 inline bool std::new_map<BasicKey, BasicValue>::iterator::operator==(const iterator &_other)const
 {
 	return (m_Data->first == _other.m_Data->first);
+}
+
+template<class BasicKey, class BasicValue>
+inline std::new_map<BasicKey, BasicValue>::Element::Element(const BasicKey & _key, const BasicValue & _value) :
+	first(_key), second(_value), m_parent(nullptr), m_left(nullptr), m_right(nullptr), m_color(Color::RED)
+{
+}
+
+template<class BasicKey, class BasicValue>
+inline std::new_map<BasicKey, BasicValue>::Element::Element() :
+	first(BasicKey()), second(BasicValue()), m_parent(nullptr), m_left(nullptr), m_right(nullptr), m_color(Color::BLACK)
+{
+}
+
+template<class BasicKey, class BasicValue>
+inline bool std::new_map<BasicKey, BasicValue>::Element::operator==(const Element &_other)
+{
+	return this->first == _other.first;
+}
+
+template<class BasicKey, class BasicValue>
+inline const bool std::new_map<BasicKey, BasicValue>::Element::operator!=(const Element &_other) const
+{
+	return this->first != _other.first;
+}
+
+template<class BasicKey, class BasicValue>
+inline std::new_map<BasicKey, BasicValue>::Element::operator bool()
+{
+	return this;
 }
