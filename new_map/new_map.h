@@ -19,7 +19,6 @@ namespace std {
 		void _leftRotate(Element*);
 		void _rightRotate(Element*);
 	public:
-		Element * const npos;
 		new_map();
 		new_map(const new_map&);
 		new_map(new_map&&);
@@ -43,8 +42,10 @@ namespace std {
 	class new_map<BasicKey, BasicValue>::iterator
 	{
 		friend class new_map<BasicKey, BasicValue>;
+		typedef new_map<BasicKey, BasicValue>::Element Element;
 		Element *m_Data;
-		Element* m_current;
+		Element *m_current;
+		Element *m_previous;
 	public:
 		iterator();
 		iterator(Element *);
@@ -66,8 +67,8 @@ namespace std {
 	class new_map<BasicKey, BasicValue>::Element
 	{
 		friend class new_map<BasicKey, BasicValue>;
+		typedef new_map<BasicKey, BasicValue>::Color Color;
 		Element(const BasicKey &, const BasicValue &);
-		Element();
 		Color m_color;
 		Element * m_parent;
 		Element * m_left;
@@ -174,7 +175,7 @@ inline void std::new_map<Key, Value>::_rightRotate(Element *_right)
 
 template<class Key, class Value>
 inline std::new_map<Key, Value>::new_map() :
-	m_pData(nullptr), npos(new Element())
+	m_pData(nullptr)
 {
 }
 
@@ -413,7 +414,7 @@ inline typename std::new_map<Key, Value>::Element* std::new_map<Key, Value>::fin
 			_current = _current->m_right;
 	}
 
-	return npos;
+	return nullptr;
 }
 
 template<class Key, class Value>
@@ -433,7 +434,7 @@ inline typename std::new_map<Key, Value>::Element * std::new_map<Key, Value>::vf
 			_current = _current->m_right;
 	}
 
-	return npos;
+	return nullptr;
 }
 
 template<class Key, class Value>
@@ -470,7 +471,7 @@ inline std::new_map<BasicKey, BasicValue>::iterator::iterator() :
 
 template<class Key, class Value>
 inline std::new_map<Key, Value>::iterator::iterator(Element * _data) :
-	m_Data(_data)
+	m_Data(_data), m_current(m_Data)
 {
 }
 
@@ -506,7 +507,7 @@ inline typename std::new_map<BasicKey, BasicValue>::iterator & std::new_map<Basi
 template<class BasicKey, class BasicValue>
 inline typename std::new_map<BasicKey, BasicValue>::Element & std::new_map<BasicKey, BasicValue>::iterator::operator*()
 {
-	return (*m_Data);
+	return (*m_current);
 }
 
 template<class BasicKey, class BasicValue>
@@ -519,32 +520,27 @@ inline typename std::new_map<BasicKey, BasicValue>::iterator & std::new_map<Basi
 template<class BasicKey, class BasicValue>
 inline typename std::new_map<BasicKey, BasicValue>::iterator & std::new_map<BasicKey, BasicValue>::iterator::operator++()
 {
-	m_current = m_Data;
-	Element* previous = nullptr;
-
-	if (previous == m_current->m_parent) { // Traversing down the tree.
-		previous = m_current;
+	if (m_previous == m_current->m_parent) {
+		m_previous = m_current;
 		if (m_current->m_left) {
 			m_current = m_current->m_left;
 		}
 		else {
-			//cout << ' ' << current->data;
 			if (m_current->m_right)
 				m_current = m_current->m_right;
 			else
 				m_current = m_current->m_parent;
 		}
 	}
-	else if (previous == m_current->m_left) { // Traversing up the tree from the left.
-		previous = m_current;
-	//	cout << ' ' << current->data;
+	else if (m_previous == m_current->m_left) {
+		m_previous = m_current;
 		if (m_current->m_right)
 			m_current = m_current->m_right;
 		else
 			m_current = m_current->m_parent;
 	}
-	else if (previous == m_current->m_right) { // Traversing up the tree from the right.
-		previous = m_current;
+	else if (m_previous == m_current->m_right) {
+		m_previous = m_current;
 		m_current = m_current->m_parent;
 	}
 	return *this;
@@ -553,7 +549,7 @@ inline typename std::new_map<BasicKey, BasicValue>::iterator & std::new_map<Basi
 template<class BasicKey, class BasicValue>
 inline bool std::new_map<BasicKey, BasicValue>::iterator::operator!=(const iterator &_other) const
 {
-	return (m_Data->first != _other.m_Data->first);
+	return (m_current->first != _other.m_Data->first);
 }
 
 template<class BasicKey, class BasicValue>
@@ -562,15 +558,10 @@ inline bool std::new_map<BasicKey, BasicValue>::iterator::operator==(const itera
 	return (m_Data->first == _other.m_Data->first);
 }
 
+
 template<class BasicKey, class BasicValue>
 inline std::new_map<BasicKey, BasicValue>::Element::Element(const BasicKey & _key, const BasicValue & _value) :
 	first(_key), second(_value), m_parent(nullptr), m_left(nullptr), m_right(nullptr), m_color(Color::RED)
-{
-}
-
-template<class BasicKey, class BasicValue>
-inline std::new_map<BasicKey, BasicValue>::Element::Element() :
-	first(BasicKey()), second(BasicValue()), m_parent(nullptr), m_left(nullptr), m_right(nullptr), m_color(Color::BLACK)
 {
 }
 
@@ -589,5 +580,5 @@ inline const bool std::new_map<BasicKey, BasicValue>::Element::operator!=(const 
 template<class BasicKey, class BasicValue>
 inline std::new_map<BasicKey, BasicValue>::Element::operator bool()
 {
-	return this;
+	return (*this);
 }

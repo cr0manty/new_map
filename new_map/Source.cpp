@@ -16,19 +16,18 @@ int main()
 	std::new_map<int, std::string>::iterator iter = mapa.begin();
 	std::new_map<int, std::string>::iterator it = mapa.end();
 
-	//(*iter).second = "kik";
-	
+	(*iter).second = "kik";
 	for (; iter != it; ++iter)
 		std::cout << (*iter).first << " ";
 
-	std::cout << mapa[1].first << std::endl;
-	std::cout << mapa.find(0)->second << std::endl;
+	//std::cout << mapa[1].first << std::endl;
+	//std::cout << mapa.find(0)->second << std::endl;
 
 	mapa.erase(5);
-	if (mapa.find(1) != mapa.npos)
+	if (mapa.find(5))
 		std::cout << "npos" << std::endl;
 
-	std::cout << mapa.find(1)->second << std::endl;
+//	std::cout << mapa.find(1)->second << std::endl;
 
 	getchar();
 	return 0;
