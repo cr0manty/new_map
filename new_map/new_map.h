@@ -471,7 +471,7 @@ inline std::new_map<BasicKey, BasicValue>::iterator::iterator() :
 
 template<class Key, class Value>
 inline std::new_map<Key, Value>::iterator::iterator(Element * _data) :
-	m_Data(_data), m_current(m_Data)
+	m_Data(_data), m_current(m_Data), m_previous(nullptr)
 {
 }
 
@@ -549,7 +549,7 @@ inline typename std::new_map<BasicKey, BasicValue>::iterator & std::new_map<Basi
 template<class BasicKey, class BasicValue>
 inline bool std::new_map<BasicKey, BasicValue>::iterator::operator!=(const iterator &_other) const
 {
-	return (m_current->first != _other.m_Data->first);
+	return m_current && (m_current->first != _other.m_Data->first);
 }
 
 template<class BasicKey, class BasicValue>
@@ -557,7 +557,6 @@ inline bool std::new_map<BasicKey, BasicValue>::iterator::operator==(const itera
 {
 	return (m_Data->first == _other.m_Data->first);
 }
-
 
 template<class BasicKey, class BasicValue>
 inline std::new_map<BasicKey, BasicValue>::Element::Element(const BasicKey & _key, const BasicValue & _value) :
