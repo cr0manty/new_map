@@ -46,6 +46,8 @@ namespace std {
 		Element *m_Data;
 		Element *m_current;
 		Element *m_previous;
+		void operatorPP();
+		void operatorMM();
 	public:
 		iterator();
 		iterator(Element *);
@@ -465,7 +467,7 @@ inline std::new_map<Key, Value>::~new_map()
 
 template<class BasicKey, class BasicValue>
 inline std::new_map<BasicKey, BasicValue>::iterator::iterator() :
-	m_Data(nullptr)
+	m_Data(nullptr), m_current(nullptr), m_previous(nullptr)
 {
 }
 
@@ -494,6 +496,40 @@ inline std::new_map<BasicKey, BasicValue>::iterator::iterator(iterator &&_other)
 }
 
 template<class BasicKey, class BasicValue>
+inline typename void std::new_map<BasicKey, BasicValue>::iterator::operatorPP()
+{
+	if (m_previous == m_current->m_parent) {
+		m_previous = m_current;
+		if (m_current->m_left) {
+			m_current = m_current->m_left;
+		}
+		else {
+			if (m_current->m_right)
+				m_current = m_current->m_right;
+			else
+				m_current = m_current->m_parent;
+		}
+	}
+	else if (m_previous == m_current->m_left) {
+		m_previous = m_current;
+		if (m_current->m_right)
+			m_current = m_current->m_right;
+		else
+			m_current = m_current->m_parent;
+	}
+	else if (m_previous == m_current->m_right) {
+		m_previous = m_current;
+		m_current = m_current->m_parent;
+	}
+}
+
+template<class BasicKey, class BasicValue>
+inline typename void std::new_map<BasicKey, BasicValue>::iterator::operatorMM()
+{
+}
+
+
+template<class BasicKey, class BasicValue>
 inline typename std::new_map<BasicKey, BasicValue>::iterator & std::new_map<BasicKey, BasicValue>::iterator::operator=(iterator &&_other)
 {
 	if (m_Data)
@@ -520,29 +556,28 @@ inline typename std::new_map<BasicKey, BasicValue>::iterator & std::new_map<Basi
 template<class BasicKey, class BasicValue>
 inline typename std::new_map<BasicKey, BasicValue>::iterator & std::new_map<BasicKey, BasicValue>::iterator::operator++()
 {
-	if (m_previous == m_current->m_parent) {
-		m_previous = m_current;
-		if (m_current->m_left) {
-			m_current = m_current->m_left;
-		}
-		else {
-			if (m_current->m_right)
-				m_current = m_current->m_right;
-			else
-				m_current = m_current->m_parent;
-		}
-	}
-	else if (m_previous == m_current->m_left) {
-		m_previous = m_current;
-		if (m_current->m_right)
-			m_current = m_current->m_right;
-		else
-			m_current = m_current->m_parent;
-	}
-	else if (m_previous == m_current->m_right) {
-		m_previous = m_current;
-		m_current = m_current->m_parent;
-	}
+	operatorPP();
+	return *this;
+}
+
+template<class BasicKey, class BasicValue>
+inline typename std::new_map<BasicKey, BasicValue>::iterator std::new_map<BasicKey, BasicValue>::iterator::operator++(int)
+{
+	operatorPP();
+	return *this;
+}
+
+template<class BasicKey, class BasicValue>
+inline typename std::new_map<BasicKey, BasicValue>::iterator & std::new_map<BasicKey, BasicValue>::iterator::operator--()
+{
+	operatorMM();
+	return *this;
+}
+
+template<class BasicKey, class BasicValue>
+inline typename std::new_map<BasicKey, BasicValue>::iterator std::new_map<BasicKey, BasicValue>::iterator::operator--(int)
+{
+	operatorMM();
 	return *this;
 }
 
