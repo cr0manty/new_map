@@ -29,6 +29,7 @@ namespace std {
 		Element* vfind(const Value &) const;
 		iterator begin() const;
 		iterator end() const;
+
 		~new_map();
 	};
 
@@ -40,11 +41,11 @@ namespace std {
 		Element *m_Data;
 		Element *m_current;
 		Element *m_previous;
-		void operatorInk();
+		void operatorInk(size_t = 1);
 	public:
 		iterator();
 		iterator(Element *);
-		iterator(const iterator&);
+		iterator(const iterator*);
 
 		Element &operator*();
 		iterator &operator=(Element &);
@@ -52,6 +53,10 @@ namespace std {
 		iterator operator++(int);
 		iterator &operator--();
 		iterator operator--(int);
+		iterator &operator-(const size_t &);
+		iterator &operator-=(const size_t &);
+		iterator &operator+(const size_t &);
+		iterator &operator+=(const size_t &);
 		bool operator!=(const iterator &) const;
 		bool operator==(const iterator &) const;
 	};
@@ -342,7 +347,7 @@ inline std::new_map<Key, Value>::iterator::iterator(Element * _data) :
 }
 
 template<class BasicKey, class BasicValue>
-inline std::new_map<BasicKey, BasicValue>::iterator::iterator(const iterator &_other)
+inline std::new_map<BasicKey, BasicValue>::iterator::iterator(const iterator *_other)
 {
 	if(m_Data)
 		delete m_Data;
@@ -351,30 +356,32 @@ inline std::new_map<BasicKey, BasicValue>::iterator::iterator(const iterator &_o
 }
 
 template<class BasicKey, class BasicValue>
-inline typename void std::new_map<BasicKey, BasicValue>::iterator::operatorInk()
+inline typename void std::new_map<BasicKey, BasicValue>::iterator::operatorInk(size_t _amount)
 {
-	if (m_previous == m_current->m_parent) {
-		m_previous = m_current;
-		if (m_current->m_left) {
-			m_current = m_current->m_left;
+	while (_amount--) {
+		if (m_previous == m_current->m_parent) {
+			m_previous = m_current;
+			if (m_current->m_left) {
+				m_current = m_current->m_left;
+			}
+			else {
+				if (m_current->m_right)
+					m_current = m_current->m_right;
+				else
+					m_current = m_current->m_parent;
+			}
 		}
-		else {
+		else if (m_previous == m_current->m_left) {
+			m_previous = m_current;
 			if (m_current->m_right)
 				m_current = m_current->m_right;
 			else
 				m_current = m_current->m_parent;
 		}
-	}
-	else if (m_previous == m_current->m_left) {
-		m_previous = m_current;
-		if (m_current->m_right)
-			m_current = m_current->m_right;
-		else 
+		else if (m_previous == m_current->m_right) {
+			m_previous = m_current;
 			m_current = m_current->m_parent;
-	}
-	else if (m_previous == m_current->m_right) {
-		m_previous = m_current;
-		m_current = m_current->m_parent;
+		}
 	}
 }
 
@@ -416,6 +423,34 @@ template<class BasicKey, class BasicValue>
 inline typename std::new_map<BasicKey, BasicValue>::iterator std::new_map<BasicKey, BasicValue>::iterator::operator--(int)
 {
 	operatorInk();
+	return *this;
+}
+
+template<class BasicKey, class BasicValue>
+inline typename std::new_map<BasicKey, BasicValue>::iterator & std::new_map<BasicKey, BasicValue>::iterator::operator-(const size_t &_amount)
+{
+	operatorInk(_amount);
+	return *this;
+}
+
+template<class BasicKey, class BasicValue>
+inline typename std::new_map<BasicKey, BasicValue>::iterator & std::new_map<BasicKey, BasicValue>::iterator::operator-=(const size_t &_amount)
+{
+	operatorInk(_amount);
+	return *this;
+}
+
+template<class BasicKey, class BasicValue>
+inline typename std::new_map<BasicKey, BasicValue>::iterator & std::new_map<BasicKey, BasicValue>::iterator::operator+(const size_t &_amount)
+{
+	operatorInk(_amount);
+	return *this;
+}
+
+template<class BasicKey, class BasicValue>
+inline typename std::new_map<BasicKey, BasicValue>::iterator & std::new_map<BasicKey, BasicValue>::iterator::operator+=(const size_t &_amount)
+{
+	operatorInk(_amount);
 	return *this;
 }
 

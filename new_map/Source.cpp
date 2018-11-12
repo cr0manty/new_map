@@ -6,6 +6,8 @@
 int main()
 {
 	std::map<int, std::string> ki;
+	for (int i = 0; i < 10; i++)
+		ki.emplace(i, "sss");
 
 	std::new_map<int, std::string> map;
 	for (int i = 0; i < 10; i++)
@@ -33,10 +35,11 @@ int main()
 	if (mapa.find(5))
 		std::cout << "npos" << std::endl;
 
+	std::cout << mapa.find(24)->second << std::endl;
+	
 	for (auto i : mapa)
 		std::cout << i.first << " ";
 
-	std::cout << mapa.find(24)->second << std::endl;
 
 	getchar();
 	return 0;
