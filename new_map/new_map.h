@@ -24,11 +24,11 @@ namespace std {
 		bool empty() const;
 		void erase(const Key &);
 		void insert(const Key &, const Value &);
-		Element* find(const Key &) const;
 		Element* at(const Key &) const;
+		Element* find(const Key &) const;
 		Element* vfind(const Value &) const;
-		Element* begin();
-		Element* end();
+		iterator begin() const;
+		iterator end() const;
 		~new_map();
 	};
 
@@ -64,9 +64,9 @@ namespace std {
 		Element * m_parent;
 		Element * m_left;
 		Element * m_right;
-		bool operator==(const Element &);
+		bool operator==(const Element &) const;
 		bool const operator!=(const Element &) const;
-		operator bool();
+		operator bool() const;
 	public:
 		BasicKey first;
 		BasicValue second;
@@ -177,7 +177,7 @@ inline void std::new_map<Key, Value>::erase(const Key &_key)
 
 	else
 	{
-		Element *_newxtNode = begin();
+		Element *_newxtNode = begin().m_Data;
 		if (_newxtNode->m_parent != _node)
 		{
 			_transplant(_newxtNode, _newxtNode->m_right);
@@ -244,7 +244,7 @@ inline void std::new_map<Key, Value>::insert(const Key &_key, const Value &_valu
 }
 
 template<class Key, class Value>
-inline typename std::new_map<Key, Value>::Element* std::new_map<Key, Value>::find(const Key &_key) const
+inline typename std::new_map<Key, Value>::Element* std::new_map<Key, Value>::at(const Key &_key) const
 {
 	Element * _current = m_pData;
 
@@ -264,7 +264,7 @@ inline typename std::new_map<Key, Value>::Element* std::new_map<Key, Value>::fin
 }
 
 template<class Key, class Value>
-inline typename std::new_map<Key, Value>::Element* std::new_map<Key, Value>::at(const Key &_key) const
+inline typename std::new_map<Key, Value>::Element* std::new_map<Key, Value>::find(const Key &_key) const
 {
 	Element * _current = m_pData;
 
@@ -304,7 +304,7 @@ inline typename std::new_map<Key, Value>::Element * std::new_map<Key, Value>::vf
 }
 
 template<class Key, class Value>
-inline typename std::new_map<Key, Value>::Element* std::new_map<Key, Value>::begin()
+inline typename std::new_map<Key, Value>::iterator std::new_map<Key, Value>::begin() const
 {
 	Element * _node = m_pData;
 	while (_node && _node->m_left)
@@ -314,7 +314,7 @@ inline typename std::new_map<Key, Value>::Element* std::new_map<Key, Value>::beg
 }
 
 template<class Key, class Value>
-inline typename std::new_map<Key, Value>::Element* std::new_map<Key, Value>::end()
+inline typename std::new_map<Key, Value>::iterator std::new_map<Key, Value>::end() const
 {
 	Element * _node = m_pData;
 	while (_node && _node->m_right)
@@ -438,7 +438,7 @@ inline std::new_map<BasicKey, BasicValue>::Element::Element(const BasicKey & _ke
 }
 
 template<class BasicKey, class BasicValue>
-inline bool std::new_map<BasicKey, BasicValue>::Element::operator==(const Element &_other)
+inline bool std::new_map<BasicKey, BasicValue>::Element::operator==(const Element &_other) const
 {
 	return (&first == &_other.first && &second == &_other.second);
 }
@@ -450,7 +450,7 @@ inline const bool std::new_map<BasicKey, BasicValue>::Element::operator!=(const 
 }
 
 template<class BasicKey, class BasicValue>
-inline std::new_map<BasicKey, BasicValue>::Element::operator bool()
+inline std::new_map<BasicKey, BasicValue>::Element::operator bool() const
 {
 	return (*this);
 }

@@ -5,8 +5,13 @@
 
 int main()
 {
+	std::map<int, std::string> ki;
+
+	std::new_map<int, std::string> map;
+	for (int i = 0; i < 10; i++)
+		map.insert(i, "sss");
+
 	std::new_map<int,std::string> mapa;
-	std::string si = "sis";
 	for (int i = 0; i < 10; i++)
 		mapa.insert(i, "sss");
 
@@ -24,11 +29,14 @@ int main()
 	for (; it != iter; --it)
 		std::cout << (*it).first << " ";
 
-	std::cout << mapa.find(24)->second << std::endl;
-
 	mapa.erase(5);
 	if (mapa.find(5))
 		std::cout << "npos" << std::endl;
+
+	for (auto i : mapa)
+		std::cout << i.first << " ";
+
+	std::cout << mapa.find(24)->second << std::endl;
 
 	getchar();
 	return 0;
