@@ -127,8 +127,6 @@ inline std::new_map<Key, Value>::new_map(const new_map &_other)
 
 	m_pData = _other.m_pData;
 	m_size = _other.m_size;
-
-	return *this;
 }
 
 template<class Key, class Value>
@@ -164,7 +162,7 @@ inline size_t std::new_map<Key, Value>::size() const
 template<class Key, class Value>
 inline bool std::new_map<Key, Value>::empty() const
 {
-	return m_size;
+	return !m_size;
 }
 
 template<class Key, class Value>
@@ -331,7 +329,10 @@ inline typename std::new_map<Key, Value>::iterator std::new_map<Key, Value>::end
 template<class Key, class Value>
 inline std::new_map<Key, Value>::~new_map()
 {
-	_destroy(m_pData);
+	if(m_pData)
+		_destroy(m_pData);
+
+	m_pData = nullptr;
 }
 
 template<class BasicKey, class BasicValue>
