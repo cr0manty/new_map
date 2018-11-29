@@ -1,21 +1,17 @@
 #include <iostream>
 #include <string>
 #include "new_map.h"
-#include <map>
 
 int main()
 {
-	std::new_map<int,std::string> map;
+	stf::new_map<int,std::string> mapa;
 	for (int i = 0; i < 10; i++)
-		map.insert(i, "sss");
-
-	std::new_map<int, std::string> mapa(map);
+		mapa.insert(i, "sss");
 
 	mapa[24] = "new";
 
-	std::new_map<int, std::string>::iterator iter = mapa.begin();
-	std::new_map<int, std::string>::iterator it = mapa.end();
-
+	stf::new_map<int, std::string>::iterator iter = mapa.begin();
+	stf::new_map<int, std::string>::iterator it = mapa.end();
 	(*iter).second = "kik";
 	for (; iter != it; ++iter)
 		std::cout << (*iter).first << " ";

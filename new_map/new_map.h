@@ -2,7 +2,7 @@
 #define NEW_MAP_H
 #include <cassert>
 
-namespace std {
+namespace stf {
 	template<class Key, class Value>
 	class new_map
 	{
@@ -15,9 +15,11 @@ namespace std {
 		void _transplant(Element *, Element*);
 	public:
 		new_map();
-		new_map(const new_map&);
+		explicit new_map(const new_map &);
+		explicit new_map(new_map &&);
 
-		new_map &operator=(const new_map&);
+		new_map &operator=(const new_map &);
+		new_map &operator=(new_map &&);
 		Value &operator[](const Key &);
 
 		size_t size() const;
@@ -37,16 +39,19 @@ namespace std {
 	class new_map<BasicKey, BasicValue>::iterator
 	{
 		friend class new_map<BasicKey, BasicValue>;
-		typedef new_map<BasicKey, BasicValue>::Element Element;
+		typedef typename new_map<BasicKey, BasicValue>::Element Element;
 		Element *m_Data;
 		Element *m_current;
 		Element *m_previous;
-		void operatorInk(size_t = 1);
+		void operator_ink(size_t = 1);
 	public:
 		iterator();
 		iterator(Element *);
-		iterator(const iterator*);
-
+		iterator(const iterator *);
+		iterator(iterator &&);
+	
+		iterator &operator=(const iterator &);
+		iterator &operator=(iterator &&);
 		Element &operator*();
 		iterator &operator=(Element &);
 		iterator &operator++();
@@ -70,8 +75,8 @@ namespace std {
 		Element * m_left;
 		Element * m_right;
 		bool operator==(const Element &) const;
-		bool const operator!=(const Element &) const;
-		operator bool() const;
+		bool operator!=(const Element &) const;
+		explicit operator bool() const;
 	public:
 		BasicKey first;
 		BasicValue second;
@@ -80,7 +85,7 @@ namespace std {
 #endif
 
 template<class Key, class Value>
-inline void std::new_map<Key, Value>::_destroy(Element *_root)
+inline void stf::new_map<Key, Value>::_destroy(Element *_root)
 {
 	if (!_root)
 		return;
@@ -92,7 +97,7 @@ inline void std::new_map<Key, Value>::_destroy(Element *_root)
 }
 
 template<class Key, class Value>
-inline void std::new_map<Key, Value>::_transplant(Element *_node, Element *_otherNode)
+inline void stf::new_map<Key, Value>::_transplant(Element *_node, Element *_otherNode)
 {
 	if (!_node->m_parent)
 	{
@@ -113,14 +118,14 @@ inline void std::new_map<Key, Value>::_transplant(Element *_node, Element *_othe
 		_otherNode->m_parent = _node->m_parent;
 }
 
-template<class Key, class Value>
-inline std::new_map<Key, Value>::new_map() :
+  template<class Key, class Value>
+inline stf::new_map<Key, Value>::new_map() :
 	m_pData(nullptr)
 {
 }
 
 template<class Key, class Value>
-inline std::new_map<Key, Value>::new_map(const new_map &_other)
+inline stf::new_map<Key, Value>::new_map(const new_map &_other)
 {
 	if (m_pData)
 		_destroy(m_pData);
@@ -130,7 +135,7 @@ inline std::new_map<Key, Value>::new_map(const new_map &_other)
 }
 
 template<class Key, class Value>
-inline std::new_map<Key, Value> & std::new_map<Key, Value>::operator=(const new_map &_other)
+inline stf::new_map<Key, Value> & stf::new_map<Key, Value>::operator=(const new_map &_other)
 {
 	if (m_pData)
 		_destroy(m_pData);
@@ -141,7 +146,7 @@ inline std::new_map<Key, Value> & std::new_map<Key, Value>::operator=(const new_
 }
 
 template<class Key, class Value>
-inline typename Value & std::new_map<Key, Value>::operator[](const Key &_key)
+inline Value & stf::new_map<Key, Value>::operator[](const Key &_key)
 {
 	Element *_find = find(_key);
 
@@ -154,19 +159,19 @@ inline typename Value & std::new_map<Key, Value>::operator[](const Key &_key)
 }
 
 template<class Key, class Value>
-inline size_t std::new_map<Key, Value>::size() const
+inline size_t stf::new_map<Key, Value>::size() const
 {
 	return m_size;
 }
 
 template<class Key, class Value>
-inline bool std::new_map<Key, Value>::empty() const
+inline bool stf::new_map<Key, Value>::empty() const
 {
 	return !m_size;
 }
 
 template<class Key, class Value>
-inline void std::new_map<Key, Value>::erase(const Key &_key)
+inline void stf::new_map<Key, Value>::erase(const Key &_key)
 {
 	Element * _node = find(_key);
 	if (!_node)
@@ -198,7 +203,7 @@ inline void std::new_map<Key, Value>::erase(const Key &_key)
 }
 
 template<class Key, class Value>
-inline void std::new_map<Key, Value>::insert(const Key &_key, const Value &_value)
+inline void stf::new_map<Key, Value>::insert(const Key &_key, const Value &_value)
 {
 	Element * _current = m_pData;
 
@@ -247,7 +252,7 @@ inline void std::new_map<Key, Value>::insert(const Key &_key, const Value &_valu
 }
 
 template<class Key, class Value>
-inline typename std::new_map<Key, Value>::Element* std::new_map<Key, Value>::at(const Key &_key) const
+inline typename stf::new_map<Key, Value>::Element* stf::new_map<Key, Value>::at(const Key &_key) const
 {
 	Element * _current = m_pData;
 
@@ -267,7 +272,7 @@ inline typename std::new_map<Key, Value>::Element* std::new_map<Key, Value>::at(
 }
 
 template<class Key, class Value>
-inline typename std::new_map<Key, Value>::Element* std::new_map<Key, Value>::find(const Key &_key) const
+inline typename stf::new_map<Key, Value>::Element* stf::new_map<Key, Value>::find(const Key &_key) const
 {
 	Element * _current = m_pData;
 
@@ -287,7 +292,7 @@ inline typename std::new_map<Key, Value>::Element* std::new_map<Key, Value>::fin
 }
 
 template<class Key, class Value>
-inline typename std::new_map<Key, Value>::Element * std::new_map<Key, Value>::vfind(const Value & _value) const
+inline typename stf::new_map<Key, Value>::Element * stf::new_map<Key, Value>::vfind(const Value & _value) const
 {
 	Element * _current = m_pData;
 
@@ -307,7 +312,7 @@ inline typename std::new_map<Key, Value>::Element * std::new_map<Key, Value>::vf
 }
 
 template<class Key, class Value>
-inline typename std::new_map<Key, Value>::iterator std::new_map<Key, Value>::begin() const
+inline typename stf::new_map<Key, Value>::iterator stf::new_map<Key, Value>::begin() const
 {
 	Element * _node = m_pData;
 	while (_node && _node->m_left)
@@ -317,7 +322,7 @@ inline typename std::new_map<Key, Value>::iterator std::new_map<Key, Value>::beg
 }
 
 template<class Key, class Value>
-inline typename std::new_map<Key, Value>::iterator std::new_map<Key, Value>::end() const
+inline typename stf::new_map<Key, Value>::iterator stf::new_map<Key, Value>::end() const
 {
 	Element * _node = m_pData;
 	while (_node && _node->m_right)
@@ -327,7 +332,7 @@ inline typename std::new_map<Key, Value>::iterator std::new_map<Key, Value>::end
 }
 
 template<class Key, class Value>
-inline std::new_map<Key, Value>::~new_map()
+inline stf::new_map<Key, Value>::~new_map()
 {
 	if(m_pData)
 		_destroy(m_pData);
@@ -336,28 +341,51 @@ inline std::new_map<Key, Value>::~new_map()
 }
 
 template<class BasicKey, class BasicValue>
-inline std::new_map<BasicKey, BasicValue>::iterator::iterator() :
+inline stf::new_map<BasicKey, BasicValue>::iterator::iterator() :
 	m_Data(nullptr), m_current(nullptr), m_previous(nullptr)
 {
 }
 
 template<class Key, class Value>
-inline std::new_map<Key, Value>::iterator::iterator(Element * _data) :
+inline stf::new_map<Key, Value>::iterator::iterator(Element * _data) :
 	m_Data(_data), m_current(m_Data), m_previous(nullptr)
 {
 }
 
 template<class BasicKey, class BasicValue>
-inline std::new_map<BasicKey, BasicValue>::iterator::iterator(const iterator *_other)
+inline stf::new_map<BasicKey, BasicValue>::iterator::iterator(const iterator *_other) :
+	m_previous(nullptr), m_Data(_other.m_Data)
 {
-	if(m_Data)
-		delete m_Data;
-
-	m_Data = _other.m_Data;
+	m_current = m_Data;
 }
 
 template<class BasicKey, class BasicValue>
-inline typename void std::new_map<BasicKey, BasicValue>::iterator::operatorInk(size_t _amount)
+inline stf::new_map<BasicKey, BasicValue>::iterator::iterator(iterator && _other) :
+	m_previous(nullptr), m_Data(_other.m_Data)
+{
+	m_current = m_Data;
+}
+
+template<class BasicKey, class BasicValue>
+inline typename stf::new_map<BasicKey, BasicValue>::iterator & stf::new_map<BasicKey, BasicValue>::iterator::operator=(const iterator & _other)
+{
+	m_Data = _other.m_Data;
+	m_current = m_Data;
+	m_previous = nullptr;
+	return *this;
+}
+
+template<class BasicKey, class BasicValue>
+inline typename stf::new_map<BasicKey, BasicValue>::iterator & stf::new_map<BasicKey, BasicValue>::iterator::operator=(iterator && _other)
+{
+	m_Data = _other.m_Data;
+	m_current = m_Data;
+	m_previous = nullptr;
+	return *this;
+}
+
+template<class BasicKey, class BasicValue>
+inline void stf::new_map<BasicKey, BasicValue>::iterator::operator_ink(size_t _amount)
 {
 	while (_amount--) {
 		if (m_previous == m_current->m_parent) {
@@ -387,106 +415,111 @@ inline typename void std::new_map<BasicKey, BasicValue>::iterator::operatorInk(s
 }
 
 template<class BasicKey, class BasicValue>
-inline typename std::new_map<BasicKey, BasicValue>::Element & std::new_map<BasicKey, BasicValue>::iterator::operator*()
+inline typename stf::new_map<BasicKey, BasicValue>::Element & stf::new_map<BasicKey, BasicValue>::iterator::operator*()
 {
 	return (*m_current);
 }
 
 template<class BasicKey, class BasicValue>
-inline typename std::new_map<BasicKey, BasicValue>::iterator & std::new_map<BasicKey, BasicValue>::iterator::operator=(Element &_data)
+inline typename stf::new_map<BasicKey, BasicValue>::iterator & stf::new_map<BasicKey, BasicValue>::iterator::operator=(
+	Element &_data)
 {
 	m_Data = _data;
 	return *this;
 }
 
 template<class BasicKey, class BasicValue>
-inline typename std::new_map<BasicKey, BasicValue>::iterator & std::new_map<BasicKey, BasicValue>::iterator::operator++()
+inline typename stf::new_map<BasicKey, BasicValue>::iterator & stf::new_map<BasicKey, BasicValue>::iterator::operator++()
 {
-	operatorInk();
+	operator_ink();
 	return *this;
 }
 
 template<class BasicKey, class BasicValue>
-inline typename std::new_map<BasicKey, BasicValue>::iterator std::new_map<BasicKey, BasicValue>::iterator::operator++(int)
+inline typename stf::new_map<BasicKey, BasicValue>::iterator stf::new_map<BasicKey, BasicValue>::iterator::operator++(int)
 {
-	operatorInk();
+	operator_ink();
 	return *this;
 }
 
 template<class BasicKey, class BasicValue>
-inline typename std::new_map<BasicKey, BasicValue>::iterator & std::new_map<BasicKey, BasicValue>::iterator::operator--()
+inline typename stf::new_map<BasicKey, BasicValue>::iterator & stf::new_map<BasicKey, BasicValue>::iterator::operator--()
 {
-	operatorInk();
+	operator_ink();
 	return *this;
 }
 
 template<class BasicKey, class BasicValue>
-inline typename std::new_map<BasicKey, BasicValue>::iterator std::new_map<BasicKey, BasicValue>::iterator::operator--(int)
+inline typename stf::new_map<BasicKey, BasicValue>::iterator stf::new_map<BasicKey, BasicValue>::iterator::operator--(int)
 {
-	operatorInk();
+	operator_ink();
 	return *this;
 }
 
 template<class BasicKey, class BasicValue>
-inline typename std::new_map<BasicKey, BasicValue>::iterator & std::new_map<BasicKey, BasicValue>::iterator::operator-(const size_t &_amount)
+inline typename stf::new_map<BasicKey, BasicValue>::iterator& stf::new_map<BasicKey, BasicValue>::iterator::operator-(
+	const size_t& _amount)
 {
-	operatorInk(_amount);
+	operator_ink(_amount);
 	return *this;
 }
 
 template<class BasicKey, class BasicValue>
-inline typename std::new_map<BasicKey, BasicValue>::iterator & std::new_map<BasicKey, BasicValue>::iterator::operator-=(const size_t &_amount)
+inline typename stf::new_map<BasicKey, BasicValue>::iterator & stf::new_map<BasicKey, BasicValue>::iterator::operator-=(
+	const size_t &_amount)
 {
-	operatorInk(_amount);
+	operator_ink(_amount);
 	return *this;
 }
 
 template<class BasicKey, class BasicValue>
-inline typename std::new_map<BasicKey, BasicValue>::iterator & std::new_map<BasicKey, BasicValue>::iterator::operator+(const size_t &_amount)
+inline typename stf::new_map<BasicKey, BasicValue>::iterator & stf::new_map<BasicKey, BasicValue>::iterator::operator+(
+	const size_t &_amount)
 {
-	operatorInk(_amount);
+	operator_ink(_amount);
 	return *this;
 }
 
 template<class BasicKey, class BasicValue>
-inline typename std::new_map<BasicKey, BasicValue>::iterator & std::new_map<BasicKey, BasicValue>::iterator::operator+=(const size_t &_amount)
+inline typename stf::new_map<BasicKey, BasicValue>::iterator & stf::new_map<BasicKey, BasicValue>::iterator::operator+=(
+	const size_t &_amount)
 {
-	operatorInk(_amount);
+	operator_ink(_amount);
 	return *this;
 }
 
 template<class BasicKey, class BasicValue>
-inline bool std::new_map<BasicKey, BasicValue>::iterator::operator!=(const iterator &_other) const
+inline bool stf::new_map<BasicKey, BasicValue>::iterator::operator!=(const iterator &_other) const
 {
 	return (m_current && !(*this == _other));
 }
 
 template<class BasicKey, class BasicValue>
-inline bool std::new_map<BasicKey, BasicValue>::iterator::operator==(const iterator &_other)const
+inline bool stf::new_map<BasicKey, BasicValue>::iterator::operator==(const iterator &_other)const
 {
 	return (m_current && *m_previous == *_other.m_current);
 }
 
 template<class BasicKey, class BasicValue>
-inline std::new_map<BasicKey, BasicValue>::Element::Element(const BasicKey & _key, const BasicValue & _value) :
+inline stf::new_map<BasicKey, BasicValue>::Element::Element(const BasicKey & _key, const BasicValue & _value) :
 	first(_key), second(_value), m_parent(nullptr), m_left(nullptr), m_right(nullptr)
 {
 }
 
 template<class BasicKey, class BasicValue>
-inline bool std::new_map<BasicKey, BasicValue>::Element::operator==(const Element &_other) const
+inline bool stf::new_map<BasicKey, BasicValue>::Element::operator==(const Element &_other) const
 {
 	return (&first == &_other.first && &second == &_other.second);
 }
 
 template<class BasicKey, class BasicValue>
-inline const bool std::new_map<BasicKey, BasicValue>::Element::operator!=(const Element &_other) const
+inline bool stf::new_map<BasicKey, BasicValue>::Element::operator!=(const Element &_other) const
 {
 	return (!(*this == _other));
 }
 
 template<class BasicKey, class BasicValue>
-inline std::new_map<BasicKey, BasicValue>::Element::operator bool() const
+inline stf::new_map<BasicKey, BasicValue>::Element::operator bool() const
 {
 	return (*this);
 }
