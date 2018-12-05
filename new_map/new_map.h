@@ -15,8 +15,8 @@ namespace stf {
 		void _transplant(Element *, Element*);
 	public:
 		new_map();
-		explicit new_map(const new_map &);
-		explicit new_map(new_map &&);
+		new_map(const new_map &);
+		new_map(new_map &&);
 
 		new_map &operator=(const new_map &);
 		new_map &operator=(new_map &&);
@@ -78,6 +78,7 @@ namespace stf {
 		bool operator!=(const Element &) const;
 		explicit operator bool() const;
 	public:
+		Element(const Element &);
 		BasicKey first;
 		BasicValue second;
 	};
@@ -130,8 +131,19 @@ inline stf::new_map<Key, Value>::new_map(const new_map &_other)
 	if (m_pData)
 		_destroy(m_pData);
 
-	m_pData = _other.m_pData;
 	m_size = _other.m_size;
+}
+
+template<class Key, class Value>
+inline stf::new_map<Key, Value>::new_map(new_map && _other)
+{
+	if (m_pData)
+		_destroy(m_pData);
+
+	m_size = _other.m_size;
+	m_pData = _other.m_pData;
+	_other.m_pData = new Element;
+	_other.m_size = 0;
 }
 
 template<class Key, class Value>
@@ -140,8 +152,20 @@ inline stf::new_map<Key, Value> & stf::new_map<Key, Value>::operator=(const new_
 	if (m_pData)
 		_destroy(m_pData);
 
-	m_pData = _other.m_pData;
 	m_size = _other.m_size;
+	return *this;
+}
+
+template<class Key, class Value>
+inline stf::new_map<Key,Value> & stf::new_map<Key, Value>::operator=(new_map && _other)
+{
+	if (m_pData)
+		_destroy(m_pData);
+
+	m_size = _other.m_size;
+	_other.m_pData = new Element;
+	_other.m_size = 0;
+
 	return *this;
 }
 
@@ -503,6 +527,12 @@ inline bool stf::new_map<BasicKey, BasicValue>::iterator::operator==(const itera
 template<class BasicKey, class BasicValue>
 inline stf::new_map<BasicKey, BasicValue>::Element::Element(const BasicKey & _key, const BasicValue & _value) :
 	first(_key), second(_value), m_parent(nullptr), m_left(nullptr), m_right(nullptr)
+{
+}
+
+template<class BasicKey, class BasicValue>
+inline stf::new_map<BasicKey, BasicValue>::Element::Element(const Element &_el) :
+	first(_el.first), second(_el.second), m_parent(_el.m_parent), m_left(_el.m_left), m_right(_el.m_right)
 {
 }
 

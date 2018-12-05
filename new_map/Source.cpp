@@ -4,9 +4,11 @@
 
 int main()
 {
-	stf::new_map<int,std::string> mapa;
+	stf::new_map<int,std::string> map;
 	for (int i = 0; i < 10; i++)
-		mapa.insert(i, "sss");
+		map.insert(i, "sss");
+
+	stf::new_map<int, std::string> mapa(map);
 
 	mapa[24] = "new";
 
