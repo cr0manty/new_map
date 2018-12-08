@@ -242,14 +242,14 @@ inline void stf::new_map<Key, Value>::erase(const Key &_key)
 template<class Key, class Value>
 inline void stf::new_map<Key, Value>::erase(const iterator &_iter)
 {
-	erase(_iter.first, _iter.second);
+	erase(_iter.first);
 }
 
 template<class Key, class Value>
 inline void stf::new_map<Key, Value>::erase(const iterator &_first, const iterator &_last)
 {
 	for (; _first != _last; _first++)
-		erase(_first);
+		erase(_first.first);
 }
 
 template<class Key, class Value>
@@ -310,7 +310,7 @@ inline void stf::new_map<Key, Value>::insert(const iterator & _iter)
 template<class Key, class Value>
 inline void stf::new_map<Key, Value>::insert(const iterator & _first, const iterator &_last)
 {
-	for (; _first != _last; first++)
+	for (; _first != _last; _first++)
 		insert(_first);
 }
 
