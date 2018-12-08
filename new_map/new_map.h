@@ -15,6 +15,7 @@ namespace stf {
 		void _transplant(Element *, Element*);
 	public:
 		new_map();
+		new_map(const iterator &, const iterator &);
 		new_map(const new_map &);
 		new_map(new_map &&);
 
@@ -25,7 +26,12 @@ namespace stf {
 		size_t size() const;
 		bool empty() const;
 		void erase(const Key &);
+		void erase(const iterator &);
+		void erase(const iterator &, const iterator &);
 		void insert(const Key &, const Value &);
+		void insert(const iterator &);
+		void insert(const iterator &, const iterator &);
+		void emplace(const Key &, const Value &);
 		Element* at(const Key &) const;
 		Element* find(const Key &) const;
 		Element* vfind(const Value &) const;
@@ -126,6 +132,12 @@ inline stf::new_map<Key, Value>::new_map() :
 }
 
 template<class Key, class Value>
+inline stf::new_map<Key, Value>::new_map(const iterator & _first, const iterator & _last)
+{
+	insert(_first, _last);
+}
+
+template<class Key, class Value>
 inline stf::new_map<Key, Value>::new_map(const new_map &_other)
 {
 	if (m_pData)
@@ -162,6 +174,7 @@ inline stf::new_map<Key,Value> & stf::new_map<Key, Value>::operator=(new_map && 
 	if (m_pData)
 		_destroy(m_pData);
 
+	m_pData = _other.m_pData;
 	m_size = _other.m_size;
 	_other.m_pData = new Element;
 	_other.m_size = 0;
@@ -227,6 +240,19 @@ inline void stf::new_map<Key, Value>::erase(const Key &_key)
 }
 
 template<class Key, class Value>
+inline void stf::new_map<Key, Value>::erase(const iterator &_iter)
+{
+	erase(_iter.first, _iter.second);
+}
+
+template<class Key, class Value>
+inline void stf::new_map<Key, Value>::erase(const iterator &_first, const iterator &_last)
+{
+	for (; _first != _last; _first++)
+		erase(_first);
+}
+
+template<class Key, class Value>
 inline void stf::new_map<Key, Value>::insert(const Key &_key, const Value &_value)
 {
 	Element * _current = m_pData;
@@ -273,6 +299,30 @@ inline void stf::new_map<Key, Value>::insert(const Key &_key, const Value &_valu
 			}
 		}
 	}
+}
+
+template<class Key, class Value>
+inline void stf::new_map<Key, Value>::insert(const iterator & _iter)
+{
+	insert(_iter.first, _iter.second);
+}
+
+template<class Key, class Value>
+inline void stf::new_map<Key, Value>::insert(const iterator & _first, const iterator &_last)
+{
+	for (; _first != _last; first++)
+		insert(_first);
+}
+
+template<class Key, class Value>
+inline void stf::new_map<Key, Value>::emplace(const Key &_key, const Value &_value)
+{
+	auto _element = find(_key);
+
+	if (_element)
+		_element.second = _value;
+	else
+		insert(_key, _value);
 }
 
 template<class Key, class Value>
@@ -545,7 +595,7 @@ inline bool stf::new_map<BasicKey, BasicValue>::Element::operator==(const Elemen
 template<class BasicKey, class BasicValue>
 inline bool stf::new_map<BasicKey, BasicValue>::Element::operator!=(const Element &_other) const
 {
-	return (!(*this == _other));
+	return !(*this == _other);
 }
 
 template<class BasicKey, class BasicValue>

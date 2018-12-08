@@ -1,9 +1,11 @@
 #include <iostream>
 #include <string>
 #include "new_map.h"
+#include <map>
 
 int main()
 {
+	std::map<int, int> maps;
 	stf::new_map<int,std::string> map;
 	for (int i = 0; i < 10; i++)
 		map.insert(i, "sss");
