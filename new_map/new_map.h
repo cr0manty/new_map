@@ -6,7 +6,9 @@ namespace stf {
 	template<class Key, class Value>
 	class new_map
 	{
-	public: class iterator;
+	public:
+		class iterator;
+		class const_iterator;
 	private:
 		class Element;
 		size_t m_size;
@@ -26,14 +28,15 @@ namespace stf {
 		size_t size() const;
 		bool empty() const;
 		void erase(const Key &);
-		void erase(const iterator &);
-		void erase(const iterator &, const iterator &);
+		void erase(iterator &);
+		void erase(iterator &, iterator &);
 		void insert(const Key &, const Value &);
-		void insert(const iterator &);
-		void insert(const iterator &, const iterator &);
+		void insert(iterator &);
+		void insert(iterator &, iterator &);
 		void emplace(const Key &, const Value &);
 		Element* at(const Key &) const;
 		Element* find(const Key &) const;
+		Element* find(const iterator &) const;
 		Element* vfind(const Value &) const;
 		iterator begin() const;
 		iterator end() const;
@@ -53,7 +56,7 @@ namespace stf {
 	public:
 		iterator();
 		iterator(Element *);
-		iterator(const iterator *);
+		iterator(const iterator &);
 		iterator(iterator &&);
 	
 		iterator &operator=(const iterator &);
@@ -71,7 +74,7 @@ namespace stf {
 		bool operator!=(const iterator &) const;
 		bool operator==(const iterator &) const;
 	};
-
+	
 	template<class BasicKey, class BasicValue>
 	class new_map<BasicKey, BasicValue>::Element
 	{
@@ -88,6 +91,7 @@ namespace stf {
 		BasicKey first;
 		BasicValue second;
 	};
+
 }
 #endif
 
@@ -143,7 +147,9 @@ inline stf::new_map<Key, Value>::new_map(const new_map &_other)
 	if (m_pData)
 		_destroy(m_pData);
 
-	m_size = _other.m_size;
+	iterator begin = _other.begin();
+	iterator end = _other.end();
+	insert(begin, end);
 }
 
 template<class Key, class Value>
@@ -164,7 +170,10 @@ inline stf::new_map<Key, Value> & stf::new_map<Key, Value>::operator=(const new_
 	if (m_pData)
 		_destroy(m_pData);
 
-	m_size = _other.m_size;
+	iterator begin = _other.begin();
+	iterator end = _other.end();
+	insert(begin, end);
+
 	return *this;
 }
 
@@ -240,13 +249,13 @@ inline void stf::new_map<Key, Value>::erase(const Key &_key)
 }
 
 template<class Key, class Value>
-inline void stf::new_map<Key, Value>::erase(const iterator &_iter)
+inline void stf::new_map<Key, Value>::erase(iterator &_iter)
 {
 	erase(_iter.first);
 }
 
 template<class Key, class Value>
-inline void stf::new_map<Key, Value>::erase(const iterator &_first, const iterator &_last)
+inline void stf::new_map<Key, Value>::erase(iterator &_first, iterator &_last)
 {
 	for (; _first != _last; _first++)
 		erase(_first.first);
@@ -302,13 +311,13 @@ inline void stf::new_map<Key, Value>::insert(const Key &_key, const Value &_valu
 }
 
 template<class Key, class Value>
-inline void stf::new_map<Key, Value>::insert(const iterator & _iter)
+inline void stf::new_map<Key, Value>::insert(iterator & _iter)
 {
-	insert(_iter.first, _iter.second);
+	insert((*_iter).first, (*_iter).second);
 }
 
 template<class Key, class Value>
-inline void stf::new_map<Key, Value>::insert(const iterator & _first, const iterator &_last)
+inline void stf::new_map<Key, Value>::insert(iterator &_first, iterator &_last)
 {
 	for (; _first != _last; _first++)
 		insert(_first);
@@ -363,6 +372,12 @@ inline typename stf::new_map<Key, Value>::Element* stf::new_map<Key, Value>::fin
 	}
 
 	return nullptr;
+}
+
+template<class Key, class Value>
+inline typename stf::new_map<Key, Value>::Element * stf::new_map<Key, Value>::find(const iterator &_iter) const
+{
+	return find(_iter.first);
 }
 
 template<class Key, class Value>
@@ -427,7 +442,7 @@ inline stf::new_map<Key, Value>::iterator::iterator(Element * _data) :
 }
 
 template<class BasicKey, class BasicValue>
-inline stf::new_map<BasicKey, BasicValue>::iterator::iterator(const iterator *_other) :
+inline stf::new_map<BasicKey, BasicValue>::iterator::iterator(const iterator &_other) :
 	m_previous(nullptr), m_Data(_other.m_Data)
 {
 	m_current = m_Data;
@@ -569,7 +584,7 @@ inline bool stf::new_map<BasicKey, BasicValue>::iterator::operator!=(const itera
 }
 
 template<class BasicKey, class BasicValue>
-inline bool stf::new_map<BasicKey, BasicValue>::iterator::operator==(const iterator &_other)const
+inline bool stf::new_map<BasicKey, BasicValue>::iterator::operator==(const iterator &_other) const
 {
 	return (m_current && *m_previous == *_other.m_current);
 }
