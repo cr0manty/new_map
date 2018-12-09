@@ -1,6 +1,5 @@
 #ifndef NEW_MAP_H
 #define NEW_MAP_H
-#include <cassert>
 
 namespace stf {
 	template<class Key, class Value>
@@ -29,7 +28,10 @@ namespace stf {
 		bool empty() const;
 		void erase(const Key &);
 		void erase(iterator &);
+		/**/
 		void erase(iterator &, iterator &);
+		/**/
+
 		void insert(const Key &, const Value &);
 		void insert(iterator &);
 		void insert(iterator &, iterator &);
@@ -112,7 +114,7 @@ inline void stf::new_map<Key, Value>::_transplant(Element *_node, Element *_othe
 {
 	if (!_node->m_parent)
 	{
-		assert(_node == m_pData);
+		_STL_VERIFY(_node == m_pData, "Debug error");
 		m_pData = _otherNode;
 	}
 
@@ -123,7 +125,7 @@ inline void stf::new_map<Key, Value>::_transplant(Element *_node, Element *_othe
 		_node->m_parent->m_right = _otherNode;
 
 	else
-		assert(0);
+		_STL_REPORT_ERROR("Error");
 
 	if (_otherNode)
 		_otherNode->m_parent = _node->m_parent;
@@ -219,6 +221,9 @@ inline bool stf::new_map<Key, Value>::empty() const
 template<class Key, class Value>
 inline void stf::new_map<Key, Value>::erase(const Key &_key)
 {
+	if ((*begin()).first == _key)
+		_STL_REPORT_ERROR("map erase iterator failed");
+
 	Element * _node = find(_key);
 	if (!_node)
 		return;
@@ -251,14 +256,14 @@ inline void stf::new_map<Key, Value>::erase(const Key &_key)
 template<class Key, class Value>
 inline void stf::new_map<Key, Value>::erase(iterator &_iter)
 {
-	erase(_iter.first);
+	erase((*_iter).first);
 }
 
 template<class Key, class Value>
 inline void stf::new_map<Key, Value>::erase(iterator &_first, iterator &_last)
 {
 	for (; _first != _last; _first++)
-		erase(_first.first);
+		erase((*_first).first);
 }
 
 template<class Key, class Value>
