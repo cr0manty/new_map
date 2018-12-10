@@ -8,7 +8,7 @@ void my_test();
 
 int main()
 {
-	//test();
+	test();
 	my_test();
 
 	getchar();
@@ -19,13 +19,13 @@ void test() {
 	std::map<int, int> map;
 	for (int i = 0; i < 10; i++)
 		map.emplace(i, 0);
-
+	map.erase(0);
 	std::map<int, int>::iterator iter = map.begin();
 	std::map<int, int>::iterator it = map.end();
 
-	map.erase(0);
 	for (; iter != it; ++iter)
 		std::cout << (*iter).first << " ";
+	std::cout << std::endl;
 }
 
 void my_test()
@@ -35,14 +35,16 @@ void my_test()
 	for (int i = 0; i < 10; i++)
 		map.insert(i, "sss");
 
-	stf::new_map<int, std::string> mapa(map);
-
+	stf::new_map<int, std::string> mapa(map.begin(),map.end());
 	mapa[24] = "new";
-
 	stf::new_map<int, std::string>::iterator iter = mapa.begin();
 	stf::new_map<int, std::string>::iterator it = mapa.end();
 	(*iter).second = "kik";
+	mapa.swap(iter, it);
 
+	iter++;
+	//mapa.erase(1);
+	
 	for (; iter != it; ++iter)
 		std::cout << (*iter).first << " ";
 
@@ -59,6 +61,4 @@ void my_test()
 
 	for (auto i : mapa)
 		std::cout << i.first << " ";
-
-
 }
