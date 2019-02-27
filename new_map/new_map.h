@@ -1,7 +1,8 @@
 #ifndef NEW_MAP_H
 #define NEW_MAP_H
 
-namespace stf {
+namespace stf 
+{
 	template<class Key, class Value>
 	class new_map
 	{
@@ -25,9 +26,7 @@ namespace stf {
 
 		size_t size() const;
 		bool empty() const;
-		void erase(const Key &);//0 элемент фикс
-		void erase(iterator &);//
-		void erase(iterator &, iterator &);//
+		void erase(const Key &);
 		void insert(const Key &, const Value &);
 		void insert(iterator &);
 		void insert(const iterator &, const iterator &);
@@ -104,8 +103,7 @@ inline void stf::new_map<Key, Value>::_destroy(Element *_root)
 template<class Key, class Value>
 inline void stf::new_map<Key, Value>::_transplant(Element *_node, Element *_otherNode)
 {
-	if (!_node->m_parent)
-	{
+	if (!_node->m_parent) {
 		_STL_VERIFY(_node == m_pData, "Debug error");
 		m_pData = _otherNode;
 	}
@@ -215,9 +213,6 @@ inline bool stf::new_map<Key, Value>::empty() const
 template<class Key, class Value>
 inline void stf::new_map<Key, Value>::erase(const Key &_key)
 {
-	//if ((*begin()).first == _key)
-	//	_STL_REPORT_ERROR("map erase iterator failed");
-
 	Element * _node = find(_key);
 	if (!_node)
 		return;
@@ -228,11 +223,9 @@ inline void stf::new_map<Key, Value>::erase(const Key &_key)
 	else if (!_node->m_right)
 		_transplant(_node, _node->m_left);
 
-	else
-	{
+	else {
 		Element *_newxtNode = begin().m_Data;
-		if (_newxtNode->m_parent != _node)
-		{
+		if (_newxtNode->m_parent != _node) {
 			_transplant(_newxtNode, _newxtNode->m_right);
 			_newxtNode->m_right = _node->m_right;
 			_newxtNode->m_right->m_parent = _newxtNode;
@@ -248,19 +241,6 @@ inline void stf::new_map<Key, Value>::erase(const Key &_key)
 }
 
 template<class Key, class Value>
-inline void stf::new_map<Key, Value>::erase(iterator &_iter)
-{
-	erase((*_iter).first);
-}
-
-template<class Key, class Value>
-inline void stf::new_map<Key, Value>::erase(iterator &_first, iterator &_last)
-{
-	for (; _first != _last; _first++)
-		erase((*_first).first);
-}
-
-template<class Key, class Value>
 inline void stf::new_map<Key, Value>::insert(const Key &_key, const Value &_value)
 {
 	Element * _current = m_pData;
@@ -272,18 +252,15 @@ inline void stf::new_map<Key, Value>::insert(const Key &_key, const Value &_valu
 		return;
 	}
 
-	while (_current)
-	{
+	while (_current) {
 		if (_current->first == _key)
 			return;
 
-		else if (_key < _current->first)
-		{
+		else if (_key < _current->first) {
 			if (_current->m_left)
 				_current = _current->m_left;
 
-			else
-			{
+			else {
 				Element * _newNode = new Element(_key, _value);
 				_newNode->m_parent = _current;
 				_current->m_left = _newNode;
@@ -292,13 +269,11 @@ inline void stf::new_map<Key, Value>::insert(const Key &_key, const Value &_valu
 			}
 		}
 
-		else
-		{
+		else {
 			if (_current->m_right)
 				_current = _current->m_right;
 
-			else
-			{
+			else {
 				Element* _newNode = new Element(_key, _value);
 				_newNode->m_parent = _current;
 				_current->m_right = _newNode;
@@ -363,8 +338,7 @@ inline typename stf::new_map<Key, Value>::Element* stf::new_map<Key, Value>::at(
 {
 	Element * _current = m_pData;
 
-	while (_current)
-	{
+	while (_current) {
 		if (_key == _current->first)
 			return _current;
 
@@ -383,8 +357,7 @@ inline typename stf::new_map<Key, Value>::Element* stf::new_map<Key, Value>::fin
 {
 	Element * _current = m_pData;
 
-	while (_current)
-	{
+	while (_current) {
 		if (_key == _current->first)
 			return _current;
 
@@ -403,8 +376,7 @@ inline typename stf::new_map<Key, Value>::Element * stf::new_map<Key, Value>::vf
 {
 	Element * _current = m_pData;
 
-	while (_current)
-	{
+	while (_current) {
 		if (_value == _current->second)
 			return _current;
 
