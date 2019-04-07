@@ -11,18 +11,18 @@ namespace stf
 	private:
 		class Element;
 		size_t m_size;
-		Element* m_pData;
-		void _destroy(Element*);
-		void _transplant(Element *, Element*);
+		Element * m_pData;
+		void _destroy(Element *);
+		void _transplant(Element *, Element *);
 	public:
 		new_map();
 		new_map(const iterator &, const iterator &);
 		new_map(const new_map &);
 		new_map(new_map &&);
 
-		new_map &operator=(const new_map &);
-		new_map &operator=(new_map &&);
-		Value &operator[](const Key &);
+		new_map & operator=(const new_map &);
+		new_map & operator=(new_map &&);
+		Value & operator[](const Key &);
 
 		size_t size() const;
 		bool empty() const;
@@ -33,9 +33,9 @@ namespace stf
 		void emplace(const Key &, const Value &);
 		void swap(const Key &, const Key &);
 		void swap(iterator &, iterator &);
-		Element* at(const Key &) const;
-		Element* find(const Key &) const;
-		Element* vfind(const Value &) const;
+		Element * at(const Key &) const;
+		Element * find(const Key &) const;
+		Element * v_find(const Value &) const;
 		iterator begin() const;
 		iterator end() const;
 
@@ -130,9 +130,7 @@ inline stf::new_map<Key, Value>::new_map() :
 template<class Key, class Value>
 inline stf::new_map<Key, Value>::new_map(const iterator & _first, const iterator & _last)
 {
-	iterator begin = _first;
-	iterator end = _last;
-	insert(begin, end);
+	insert(_first, _last);
 }
 
 template<class Key, class Value>
@@ -141,9 +139,7 @@ inline stf::new_map<Key, Value>::new_map(const new_map &_other)
 	if (m_pData)
 		_destroy(m_pData);
 
-	iterator begin = _other.begin();
-	iterator end = _other.end();
-	insert(begin, end);
+	insert(_other.begin(), _other.end());
 }
 
 template<class Key, class Value>
@@ -164,10 +160,7 @@ inline stf::new_map<Key, Value> & stf::new_map<Key, Value>::operator=(const new_
 	if (m_pData)
 		_destroy(m_pData);
 
-	iterator begin = _other.begin();
-	iterator end = _other.end();
-	insert(begin, end);
-
+	insert(_other.begin(), _other.end());
 	return *this;
 }
 
@@ -245,8 +238,7 @@ inline void stf::new_map<Key, Value>::insert(const Key &_key, const Value &_valu
 {
 	Element * _current = m_pData;
 
-	if (!_current)
-	{
+	if (!_current) {
 		m_pData = new Element(_key, _value);
 		m_size++;
 		return;
@@ -261,9 +253,9 @@ inline void stf::new_map<Key, Value>::insert(const Key &_key, const Value &_valu
 				_current = _current->m_left;
 
 			else {
-				Element * _newNode = new Element(_key, _value);
-				_newNode->m_parent = _current;
-				_current->m_left = _newNode;
+				Element * _node = new Element(_key, _value);
+				_node->m_parent = _current;
+				_current->m_left = _node;
 				m_size++;
 				return;
 			}
@@ -274,9 +266,9 @@ inline void stf::new_map<Key, Value>::insert(const Key &_key, const Value &_valu
 				_current = _current->m_right;
 
 			else {
-				Element* _newNode = new Element(_key, _value);
-				_newNode->m_parent = _current;
-				_current->m_right = _newNode;
+				Element* _node = new Element(_key, _value);
+				_node->m_parent = _current;
+				_current->m_right = _node;
 				m_size++;
 				return;
 			}
@@ -293,17 +285,17 @@ inline void stf::new_map<Key, Value>::insert(iterator & _iter)
 template<class Key, class Value>
 inline void stf::new_map<Key, Value>::insert(const iterator &_first, const iterator &_last)
 {
-	iterator begin = _first;
-	iterator end = _last;
+	iterator first = _first;
+	iterator last = _last;
 
-	for (; begin != end; begin++)
-		insert(begin);
+	for (; first != last; first++)
+		insert(first);
 }
 
 template<class Key, class Value>
 inline void stf::new_map<Key, Value>::emplace(const Key &_key, const Value &_value)
 {
-	auto _element = find(_key);
+	Element * _element = find(_key);
 
 	if (_element)
 		_element.second = _value;
@@ -318,19 +310,19 @@ inline void stf::new_map<Key, Value>::swap(const Key & _first, const Key & _seco
 	Element *second = find(_second);
 
 	if (first && second) {
-		Value _buffer = first->second;
+		Value _temp = first->second;
 		first->second = second->second;
-		second->second = _buffer;
+		second->second = _temp;
 	}
 }
 
 template<class Key, class Value>
 inline void stf::new_map<Key, Value>::swap(iterator & _first, iterator & _second)
 {
-	Value _buffer = (*_first).second;
+	Value _temp = (*_first).second;
 
 	(*_first).second = (*_second).second;
-	(*_second).second = _buffer;
+	(*_second).second = _temp;
 }
 
 template<class Key, class Value>
@@ -372,7 +364,7 @@ inline typename stf::new_map<Key, Value>::Element* stf::new_map<Key, Value>::fin
 }
 
 template<class Key, class Value>
-inline typename stf::new_map<Key, Value>::Element * stf::new_map<Key, Value>::vfind(const Value & _value) const
+inline typename stf::new_map<Key, Value>::Element * stf::new_map<Key, Value>::v_find(const Value & _value) const
 {
 	Element * _current = m_pData;
 
@@ -415,8 +407,6 @@ inline stf::new_map<Key, Value>::~new_map()
 {
 	if(m_pData)
 		_destroy(m_pData);
-
-	m_pData = nullptr;
 }
 
 template<class BasicKey, class BasicValue>
